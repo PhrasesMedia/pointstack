@@ -141,19 +141,47 @@
     .dot{ width:8px; height:8px; border-radius:999px; background: var(--warn); }
     .dot.ok{ background: var(--ok); }
 
-    .totalRow{
+    /* ========= Rewards-style total card (now used in the balances section) ========= */
+    .rewardsCard{
       display:flex;
       justify-content:space-between;
-      gap:12px;
+      align-items:center;
+      gap:16px;
       margin-top:12px;
-      padding:12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.18);
-      align-items:baseline;
+      padding:16px 16px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.14);
+      background:
+        radial-gradient(600px 200px at 0% 0%, rgba(255,255,255,0.12), transparent 60%),
+        linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02));
+      box-shadow:
+        0 20px 40px rgba(0,0,0,0.40),
+        inset 0 1px 0 rgba(255,255,255,0.12);
     }
-    .totalRow .label{ color:var(--muted); font-size:12px; }
-    .totalRow .value{ font-size:20px; letter-spacing:-0.02em; }
+    .rewardsLeft{ display:flex; flex-direction:column; gap:4px; }
+    .rewardsLabel{
+      font-size:12px;
+      color:var(--muted);
+      letter-spacing:0.04em;
+      text-transform:uppercase;
+    }
+    .rewardsValue{
+      font-size:26px;
+      font-weight:600;
+      letter-spacing:-0.02em;
+      line-height:1.1;
+    }
+    .rewardsSub{ font-size:13px; color:var(--muted); }
+    .rewardsRight{ display:flex; align-items:center; }
+    .rewardsBadge{
+      padding:8px 14px;
+      border-radius:999px;
+      font-size:12px;
+      letter-spacing:0.04em;
+      text-transform:uppercase;
+      border:1px solid rgba(255,255,255,0.25);
+      background: rgba(0,0,0,0.25);
+    }
 
     footer{ margin-top:16px; color:var(--muted); font-size:12px; line-height:1.45; }
     code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
@@ -254,12 +282,17 @@
         <tbody id="balancesBody"></tbody>
       </table>
 
-      <div class="totalRow">
-        <div>
-          <div class="label">Total cash-out across all programs</div>
+      <!-- Rewards-style total card (replaces the old totalRow) -->
+      <section class="rewardsCard" aria-label="Total cash-out across all programs">
+        <div class="rewardsLeft">
+          <div class="rewardsLabel">Total cash-out</div>
+          <div class="rewardsValue" id="totalCashoutRewards">$0.00</div>
+          <div class="rewardsSub">Across all programs</div>
         </div>
-        <div class="value" id="totalCashout">$0.00</div>
-      </div>
+        <div class="rewardsRight">
+          <div class="rewardsBadge">Cash</div>
+        </div>
+      </section>
 
       <div class="actions" style="margin-top:12px;">
         <button id="saveBalancesBtn" type="button">Save balances</button>
@@ -328,7 +361,7 @@
       }
     };
 
-    const STORAGE_KEY = "points_converter_balances_v2"; // bump version from v1
+    const STORAGE_KEY = "points_converter_balances_v2";
 
     // DOM refs
     const programEl = document.getElementById('program');
@@ -351,7 +384,7 @@
     const clearBalancesBtn = document.getElementById('clearBalancesBtn');
 
     const ratesBody = document.getElementById('ratesBody');
-    const totalCashoutEl = document.getElementById('totalCashout');
+    const totalCashoutRewardsEl = document.getElementById('totalCashoutRewards');
 
     const saveDot = document.getElementById('saveDot');
     const saveStatus = document.getElementById('saveStatus');
@@ -378,12 +411,10 @@
     }
 
     function parseMoney(input){
-      // allow commas, $, spaces
       const cleaned = String(input).replace(/[$,\s]/g, '');
       if(!cleaned) return 0;
       const num = Number(cleaned);
       if(!Number.isFinite(num) || num <= 0) return 0;
-      // keep 2dp
       return Math.round(num * 100) / 100;
     }
 
@@ -472,6 +503,14 @@
       }
     }
 
+    function updateTotalCashout(){
+      let total = 0;
+      for(const [k, v] of Object.entries(BALANCES)){
+        total += cashoutFor(k, v);
+      }
+      totalCashoutRewardsEl.textContent = formatMoney(total, 2);
+    }
+
     function renderBalancesTable(){
       balancesBody.innerHTML = "";
 
@@ -509,7 +548,6 @@
 
           tdCash.textContent = formatMoney(cashoutFor(key, newVal), 2);
 
-          // if currently selected program, sync calculator input
           if(programEl.value === key){
             setCalculatorInputFromSaved();
             updateCalculator(false);
@@ -530,14 +568,6 @@
       }
 
       updateTotalCashout();
-    }
-
-    function updateTotalCashout(){
-      let total = 0;
-      for(const [k, v] of Object.entries(BALANCES)){
-        total += cashoutFor(k, v);
-      }
-      totalCashoutEl.textContent = formatMoney(total, 2);
     }
 
     function setCalculatorUIForProgram(){
@@ -578,8 +608,8 @@
 
       const decimals = Number(roundingEl.value);
 
-      let raw = amountInputEl.value;
-      let balanceVal = (cfg.type === "cash") ? parseMoney(raw) : parsePoints(raw);
+      const raw = amountInputEl.value;
+      const balanceVal = (cfg.type === "cash") ? parseMoney(raw) : parsePoints(raw);
 
       const value = cashoutFor(key, balanceVal);
 
@@ -607,7 +637,6 @@
     amountInputEl.addEventListener('input', () => {
       updateCalculator(false);
 
-      // Keep saved balance in sync with calculator typing
       setSavedUI(false);
       const key = programEl.value;
       const cfg = PROGRAMS[key];
@@ -656,7 +685,6 @@
     });
 
     saveBalancesBtn.addEventListener('click', () => {
-      // pull latest values from table
       const inputs = balancesBody.querySelectorAll("input[data-program-key]");
       inputs.forEach(inp => {
         const k = inp.dataset.programKey;
@@ -664,7 +692,7 @@
         BALANCES[k] = (cfg.type === "cash") ? parseMoney(inp.value) : parsePoints(inp.value);
       });
       saveBalancesNow();
-      renderBalancesTable(); // reformat numbers nicely
+      renderBalancesTable();
       updateCalculator(false);
     });
 
