@@ -42,9 +42,6 @@
       white-space:nowrap;
     }
 
-    .grid{ display:grid; grid-template-columns: 1fr; gap:14px; margin-top:14px; }
-    @media (min-width: 900px){ .grid{ grid-template-columns: 1.05fr 0.95fr; } }
-
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
       border:1px solid var(--border);
@@ -55,9 +52,6 @@
     .card h2{ margin:0 0 10px 0; font-size:16px; letter-spacing:-0.01em; }
 
     label{ display:block; color:var(--muted); font-size:12px; margin:12px 0 6px; }
-    .row{ display:grid; grid-template-columns: 1fr; gap:10px; }
-    @media (min-width: 560px){ .row{ grid-template-columns: 1fr 1fr; } }
-
     input, select{
       width:100%;
       padding:12px 12px;
@@ -72,24 +66,7 @@
 
     .hint{ color:var(--muted); font-size:12px; margin-top:8px; line-height:1.45; }
 
-    .result{ display:flex; flex-direction:column; gap:10px; }
-    .big{ font-size:34px; letter-spacing:-0.03em; margin:2px 0 0; }
-
-    .meta{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      color:var(--muted);
-      font-size:12px;
-    }
-    .meta span{
-      border:1px solid var(--border);
-      padding:8px 10px;
-      border-radius:999px;
-      background: rgba(0,0,0,0.18);
-    }
-
-    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
     button{
       cursor:pointer;
       padding:10px 12px;
@@ -113,6 +90,34 @@
       line-height:1.45;
     }
 
+    .meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      color:var(--muted);
+      font-size:12px;
+      margin-top:10px;
+    }
+    .meta span{
+      border:1px solid var(--border);
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,0.18);
+    }
+
+    .big{ font-size:34px; letter-spacing:-0.03em; margin:4px 0 0; }
+
+    /* ===== Merged Converter layout ===== */
+    .converterGrid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+    }
+    @media (min-width: 900px){
+      .converterGrid{ grid-template-columns: 1.1fr 0.9fr; }
+    }
+
+    /* ===== Balances / Rates tables ===== */
     .table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
     .table th, .table td{
       text-align:left;
@@ -143,9 +148,8 @@
     .dot{ width:8px; height:8px; border-radius:999px; background: var(--warn); }
     .dot.ok{ background: var(--ok); }
 
-    /* ============ Point Stack Card ============ */
-    .stackCardWrap{ margin-top:12px; }
-
+    /* ============ Point Stack Card (Total) ============ */
+    .stackCardWrap{ margin-top:14px; }
     .stackCard{
       position:relative;
       overflow:hidden;
@@ -159,7 +163,6 @@
         linear-gradient(135deg, #a3162a 0%, #d11d37 35%, #a3162a 70%, #7e0f22 100%);
       min-height:150px;
     }
-
     .stackCard::before{
       content:"";
       position:absolute;
@@ -171,42 +174,32 @@
       transform: rotate(10deg);
       pointer-events:none;
     }
-
-    .stackTop{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:12px;
+    /* subtle sparkle + streak */
+    .stackCard::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at 78% 18%, rgba(255,255,255,0.28), transparent 18%),
+        radial-gradient(circle at 84% 24%, rgba(255,255,255,0.22), transparent 16%),
+        radial-gradient(circle at 90% 14%, rgba(255,255,255,0.18), transparent 14%),
+        linear-gradient(115deg,
+          transparent 0%,
+          rgba(255,255,255,0.10) 28%,
+          rgba(255,255,255,0.18) 33%,
+          rgba(255,255,255,0.06) 38%,
+          transparent 60%);
+      mix-blend-mode: screen;
+      opacity:0.38;
     }
 
-    .stackBrand{
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      min-width: 180px;
-    }
+    .stackTop{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; position:relative; z-index:1; }
+    .stackBrand{ display:flex; flex-direction:column; gap:4px; min-width: 180px; }
+    .stackBrandName{ font-weight:700; letter-spacing:0.06em; text-transform:uppercase; font-size:13px; opacity:0.95; }
+    .stackTagline{ font-size:12px; color: rgba(255,255,255,0.84); opacity:0.95; }
 
-    .stackBrandName{
-      font-weight:700;
-      letter-spacing:0.06em;
-      text-transform:uppercase;
-      font-size:13px;
-      opacity:0.95;
-    }
-
-    .stackTagline{
-      font-size:12px;
-      color: rgba(255,255,255,0.82);
-      opacity:0.95;
-    }
-
-    .stackActions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
+    .stackActions{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
     .stackBtn{
       padding:8px 12px;
       border-radius:999px;
@@ -217,25 +210,23 @@
     }
     .stackBtn:hover{ background: rgba(0,0,0,0.28); }
 
-    .stackMid{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
-      margin-top:14px;
-    }
-
+    .stackMid{ display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:14px; position:relative; z-index:1; }
     .chip{
-      width:44px;
-      height:34px;
-      border-radius:8px;
+      width:44px; height:34px; border-radius:8px;
       background:
-        linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.10)),
-        linear-gradient(135deg, #d9b46a, #b8892f);
-      border:1px solid rgba(255,255,255,0.20);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+        linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.08)),
+        linear-gradient(135deg, #f6d98f 0%, #d7aa4a 35%, #b57f22 70%, #f0d27a 100%);
+      border:1px solid rgba(255,255,255,0.22);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 10px 18px rgba(0,0,0,0.25);
       position:relative;
-      flex: 0 0 auto;
+      flex:0 0 auto;
+    }
+    .chip:before{
+      content:"";
+      position:absolute; inset:0;
+      border-radius:8px;
+      background: linear-gradient(120deg, transparent 10%, rgba(255,255,255,0.25) 35%, transparent 60%);
+      opacity:0.35;
     }
     .chip:after{
       content:"";
@@ -258,19 +249,13 @@
       user-select:none;
     }
 
-    .stackAmountBlock{
-      text-align:right;
-      flex: 0 0 auto;
-      min-width: 140px;
-    }
-
+    .stackAmountBlock{ text-align:right; flex: 0 0 auto; min-width: 140px; }
     .stackAmountLabel{
       font-size:11px;
       letter-spacing:0.08em;
       text-transform:uppercase;
-      color: rgba(255,255,255,0.80);
+      color: rgba(255,255,255,0.82);
     }
-
     .stackAmount{
       font-size:28px;
       font-weight:700;
@@ -279,22 +264,14 @@
       color: rgba(255,255,255,0.98);
     }
 
-    .stackBottom{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      margin-top:10px;
-      align-items:flex-end;
-    }
-
+    .stackBottom{ display:flex; justify-content:space-between; gap:12px; margin-top:10px; align-items:flex-end; position:relative; z-index:1; }
     .stackMeta{
       display:flex;
       flex-direction:column;
       gap:4px;
-      color: rgba(255,255,255,0.82);
+      color: rgba(255,255,255,0.84);
       font-size:12px;
     }
-
     .stackBadge{
       padding:8px 12px;
       border-radius:999px;
@@ -330,12 +307,13 @@
       <div class="pill">AUD • cash-out</div>
     </header>
 
-    <div class="grid">
-      <!-- Inputs -->
-      <section class="card">
-        <h2>Convert</h2>
+    <!-- Converter (merged) -->
+    <section class="card">
+      <h2>Converter</h2>
 
-        <div class="row">
+      <div class="converterGrid">
+        <!-- Inputs -->
+        <div>
           <div>
             <label for="program">Program</label>
             <select id="program"></select>
@@ -345,24 +323,18 @@
             <label id="amountLabel" for="amountInput">Points</label>
             <input id="amountInput" type="text" inputmode="decimal" placeholder="e.g. 50,000" />
           </div>
+
+          <p class="hint" id="hintText">
+            Tip: Commas work (e.g. <b>120,000</b>). Switching programs loads your saved balance.
+          </p>
+
+          <div class="note" id="rateNote"></div>
         </div>
 
-        <p class="hint" id="hintText">
-          Tip: Commas work (e.g. <b>120,000</b>). Switching programs loads your saved balance.
-        </p>
-
-        <div class="note" id="rateNote"></div>
-      </section>
-
-      <!-- Result -->
-      <section class="card">
-        <h2>Cash-out value</h2>
-
-        <div class="result">
-          <div>
-            <div class="sub" id="resultLabel">Estimated value</div>
-            <div class="big" id="resultValue">$0.00</div>
-          </div>
+        <!-- Result -->
+        <div>
+          <div class="sub" id="resultLabel">Estimated value</div>
+          <div class="big" id="resultValue">$0.00</div>
 
           <div class="meta">
             <span id="metaAmount">0 points</span>
@@ -371,17 +343,56 @@
 
           <div class="actions">
             <button id="copyBtn" type="button">Copy result</button>
-            <button id="resetCalcBtn" type="button">Reset calculator</button>
+            <button id="resetCalcBtn" type="button">Reset</button>
           </div>
 
           <div class="note">
             Everyday Rewards is treated as a <b>cash balance</b>. Points programs use the fixed rates below (editable).
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+
+    <!-- RESULTS: Total card ABOVE balances -->
+    <div class="stackCardWrap" aria-label="Total cash-out across all programs">
+      <div class="stackCard">
+        <div class="stackTop">
+          <div class="stackBrand">
+            <div class="stackBrandName">POINT STACK</div>
+            <div class="stackTagline">Total cash-out across all programs</div>
+          </div>
+
+          <div class="stackActions">
+            <button class="stackBtn" id="exportBtn" type="button">Export</button>
+            <button class="stackBtn" id="copySummaryBtn" type="button">Copy summary</button>
+          </div>
+        </div>
+
+        <div class="stackMid">
+          <div class="chip" aria-hidden="true"></div>
+
+          <div class="stackDigits" aria-hidden="true">
+            <span>1234</span><span>5678</span><span>9012</span><span>3456</span>
+          </div>
+
+          <div class="stackAmountBlock">
+            <div class="stackAmountLabel">TOTAL CASH-OUT</div>
+            <div class="stackAmount" id="totalCashoutStack">$0.00</div>
+          </div>
+        </div>
+
+        <div class="stackBottom">
+          <div class="stackMeta">
+            <div id="lastUpdatedText">Last updated: —</div>
+            <div>Currency: AUD</div>
+          </div>
+
+          <div class="stackBadge">CASH</div>
+        </div>
+      </div>
     </div>
 
-    <!-- Saved balances -->
+    <!-- My balances -->
     <section class="card" style="margin-top:14px;">
       <h2>My balances</h2>
       <p class="sub" style="margin-top:-4px;">Store your balances per program. Saved to your browser (localStorage).</p>
@@ -396,45 +407,6 @@
         </thead>
         <tbody id="balancesBody"></tbody>
       </table>
-
-      <!-- Point Stack Card (Total) -->
-      <div class="stackCardWrap" aria-label="Total cash-out across all programs">
-        <div class="stackCard">
-          <div class="stackTop">
-            <div class="stackBrand">
-              <div class="stackBrandName">POINT STACK</div>
-              <div class="stackTagline">Total cash-out across all programs</div>
-            </div>
-
-            <div class="stackActions">
-              <button class="stackBtn" id="exportBtn" type="button">Export</button>
-              <button class="stackBtn" id="copySummaryBtn" type="button">Copy summary</button>
-            </div>
-          </div>
-
-          <div class="stackMid">
-            <div class="chip" aria-hidden="true"></div>
-
-            <div class="stackDigits" aria-hidden="true">
-              <span>1234</span><span>5678</span><span>9012</span><span>3456</span>
-            </div>
-
-            <div class="stackAmountBlock">
-              <div class="stackAmountLabel">TOTAL CASH-OUT</div>
-              <div class="stackAmount" id="totalCashoutStack">$0.00</div>
-            </div>
-          </div>
-
-          <div class="stackBottom">
-            <div class="stackMeta">
-              <div id="lastUpdatedText">Last updated: —</div>
-              <div>Currency: AUD</div>
-            </div>
-
-            <div class="stackBadge">CASH</div>
-          </div>
-        </div>
-      </div>
 
       <div class="actions" style="margin-top:12px;">
         <button id="saveBalancesBtn" type="button">Save balances</button>
@@ -503,7 +475,7 @@
       }
     };
 
-    const STORAGE_KEY = "point_stack_balances_v1";
+    const STORAGE_KEY = "point_stack_balances_v3_total_above";
 
     // DOM refs
     const programEl = document.getElementById('program');
@@ -535,18 +507,14 @@
     const totalCashoutStackEl = document.getElementById('totalCashoutStack');
 
     function formatMoney(amount){
-      const opts = {
+      return new Intl.NumberFormat("en-AU", {
         style: "currency",
         currency: "AUD",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-      };
-      return new Intl.NumberFormat("en-AU", opts).format(amount || 0);
+      }).format(amount || 0);
     }
-
-    function formatNumber(n){
-      return new Intl.NumberFormat("en-AU").format(n);
-    }
+    function formatNumber(n){ return new Intl.NumberFormat("en-AU").format(n); }
 
     function parsePoints(input){
       const cleaned = String(input).replace(/[,\s]/g, '');
@@ -554,7 +522,6 @@
       const num = Number(cleaned);
       return Number.isFinite(num) && num > 0 ? Math.floor(num) : 0;
     }
-
     function parseMoney(input){
       const cleaned = String(input).replace(/[$,\s]/g, '');
       if(!cleaned) return 0;
