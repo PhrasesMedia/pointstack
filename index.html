@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Point Stack – Points Cash-Out Converter</title>
-  <meta name="description" content="Point Stack: convert Flybuys, Amex, and Velocity points to a cash-out estimate, store balances, include Everyday Rewards cash, and export a summary." />
+  <meta name="description" content="Point Stack: convert Flybuys, Amex, and Velocity points to a cash-out estimate, include Everyday Rewards cash, and export a summary." />
 
   <style>
     :root{
@@ -14,8 +14,6 @@
       --border:rgba(255,255,255,0.08);
       --shadow: 0 12px 30px rgba(0,0,0,0.35);
       --radius:16px;
-      --ok:#a7f3d0;
-      --warn:#fde68a;
     }
     *{box-sizing:border-box}
     body{
@@ -176,7 +174,15 @@
     }
     .stackBtn:hover{ background: rgba(0,0,0,0.28); }
 
-    .stackMid{ display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:14px; position:relative; z-index:1; }
+    .stackMid{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-top:14px;
+      position:relative;
+      z-index:1;
+    }
     .chip{
       width:44px; height:34px; border-radius:8px;
       background:
@@ -230,7 +236,54 @@
       color: rgba(255,255,255,0.98);
     }
 
-    .stackBottom{ display:flex; justify-content:space-between; gap:12px; margin-top:10px; align-items:flex-end; position:relative; z-index:1; }
+    /* ✅ NEW: Vertical breakdown pinned to the left side */
+    .stackBreakdown{
+      margin-top:10px;
+      position:relative;
+      z-index:1;
+      width: min(360px, 72%);
+      padding-left: 56px; /* lines up under the chip */
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      color: rgba(255,255,255,0.90);
+      font-size:12px;
+      line-height:1.2;
+    }
+    .stackBreakdown .item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:6px 10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.14);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .stackBreakdown .name{
+      opacity:0.95;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 240px;
+    }
+    .stackBreakdown .val{
+      font-weight:800;
+      white-space:nowrap;
+      opacity:0.98;
+    }
+
+    .stackBottom{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:12px;
+      align-items:flex-end;
+      position:relative;
+      z-index:1;
+    }
     .stackMeta{
       display:flex;
       flex-direction:column;
@@ -248,6 +301,7 @@
       text-transform:uppercase;
       color: rgba(255,255,255,0.92);
       align-self:flex-end;
+      white-space:nowrap;
     }
 
     @media (max-width: 520px){
@@ -256,179 +310,11 @@
       .stackActions{ justify-content:flex-start; }
       .stackMid{ align-items:flex-start; }
       .stackAmountBlock{ min-width:unset; }
-    }
-
-    /* ============================
-       SILVER SHINY "MY BALANCES" CARD
-       ============================ */
-    .balancesSilverWrap{
-      margin-top:12px;
-      position:relative;
-      border-radius:18px;
-      padding:1px; /* for border glow */
-      background: linear-gradient(135deg,
-        rgba(255,255,255,0.18),
-        rgba(255,255,255,0.06),
-        rgba(255,255,255,0.14));
-      box-shadow:
-        0 24px 55px rgba(0,0,0,0.55),
-        inset 0 1px 0 rgba(255,255,255,0.25);
-      overflow:hidden;
-    }
-    /* brushed metal + shine layers */
-    .balancesSilverWrap::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background:
-        /* brushed metal micro-lines */
-        repeating-linear-gradient(90deg,
-          rgba(255,255,255,0.03) 0px,
-          rgba(255,255,255,0.03) 1px,
-          rgba(0,0,0,0.00) 3px,
-          rgba(0,0,0,0.00) 6px),
-        /* soft top highlight */
-        radial-gradient(900px 240px at 20% 0%,
-          rgba(255,255,255,0.20),
-          rgba(255,255,255,0.00) 60%),
-        /* diagonal shine streak */
-        linear-gradient(115deg,
-          rgba(255,255,255,0.00) 0%,
-          rgba(255,255,255,0.08) 30%,
-          rgba(255,255,255,0.18) 36%,
-          rgba(255,255,255,0.06) 44%,
-          rgba(255,255,255,0.00) 70%);
-      mix-blend-mode: overlay;
-      opacity:0.9;
-    }
-
-    .balancesSilver{
-      position:relative;
-      border-radius:18px;
-      padding:14px;
-      background:
-        radial-gradient(900px 280px at 20% 0%,
-          rgba(255,255,255,0.12),
-          rgba(255,255,255,0.00) 55%),
-        linear-gradient(180deg,
-          rgba(255,255,255,0.10),
-          rgba(255,255,255,0.04) 35%,
-          rgba(0,0,0,0.20) 100%);
-      border:1px solid rgba(255,255,255,0.12);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.20),
-        inset 0 -1px 0 rgba(0,0,0,0.35);
-      overflow:hidden;
-    }
-
-    .balancesTableHead{
-      display:grid;
-      grid-template-columns: 1fr 220px 140px;
-      gap:10px;
-      padding:10px 10px;
-      border:1px solid rgba(255,255,255,0.10);
-      border-radius:14px;
-      background: rgba(0,0,0,0.18);
-      margin-top:12px;
-      color: rgba(229,231,235,0.82);
-      font-size:11px;
-      letter-spacing:0.10em;
-      text-transform:uppercase;
-    }
-
-    .balRow{
-      display:grid;
-      grid-template-columns: 1fr 220px 140px;
-      gap:10px;
-      align-items:center;
-      margin-top:10px;
-      padding:12px 12px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,0.10);
-      background:
-        radial-gradient(600px 160px at 10% 0%,
-          rgba(255,255,255,0.08),
-          rgba(255,255,255,0.00) 55%),
-        linear-gradient(180deg,
-          rgba(0,0,0,0.16),
-          rgba(0,0,0,0.28));
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.10),
-        0 10px 22px rgba(0,0,0,0.28);
-    }
-
-    .balName{
-      font-weight:700;
-      letter-spacing:-0.01em;
-      line-height:1.2;
-    }
-    .balSub{
-      margin-top:4px;
-      font-size:12px;
-      color: rgba(229,231,235,0.70);
-      line-height:1.25;
-    }
-
-    .balCash{
-      text-align:right;
-    }
-    .balCashLabel{
-      font-size:11px;
-      letter-spacing:0.10em;
-      text-transform:uppercase;
-      color: rgba(229,231,235,0.60);
-    }
-    .balCashValue{
-      font-size:16px;
-      font-weight:800;
-      margin-top:2px;
-    }
-
-    /* make inputs look more "inset" on silver card */
-    .balancesSilver input{
-      border-radius:14px;
-      background: rgba(0,0,0,0.28);
-      border:1px solid rgba(255,255,255,0.12);
-      box-shadow:
-        inset 0 2px 10px rgba(0,0,0,0.35),
-        inset 0 1px 0 rgba(255,255,255,0.06);
-    }
-
-    @media (max-width: 860px){
-      .balancesTableHead, .balRow{
-        grid-template-columns: 1fr 190px 120px;
+      .stackBreakdown{
+        width: 100%;
+        padding-left: 0;
       }
     }
-    @media (max-width: 720px){
-      .balancesTableHead{ display:none; }
-      .balRow{
-        grid-template-columns: 1fr;
-        gap:10px;
-      }
-      .balCash{ text-align:left; }
-    }
-
-    .status{
-      margin-top:10px;
-      font-size:12px;
-      color:var(--muted);
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .badge{
-      display:inline-flex;
-      gap:6px;
-      align-items:center;
-      border:1px solid var(--border);
-      padding:6px 10px;
-      border-radius:999px;
-      background: rgba(0,0,0,0.18);
-    }
-    .dot{ width:8px; height:8px; border-radius:999px; background: var(--warn); }
-    .dot.ok{ background: var(--ok); }
 
     /* ===== Rates table ===== */
     .table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
@@ -529,6 +415,9 @@
           </div>
         </div>
 
+        <!-- Breakdown (vertical, left-aligned) -->
+        <div class="stackBreakdown" id="stackBreakdown" aria-label="Cash-out breakdown"></div>
+
         <div class="stackBottom">
           <div class="stackMeta">
             <div id="lastUpdatedText">Last updated: —</div>
@@ -539,34 +428,6 @@
         </div>
       </div>
     </div>
-
-    <!-- My balances (silver shiny card) -->
-    <section class="card" style="margin-top:14px;">
-      <h2>My balances</h2>
-      <p class="sub" style="margin-top:-4px;">Store your balances per program. Saved to your browser (localStorage).</p>
-
-      <div class="balancesSilverWrap">
-        <div class="balancesSilver">
-          <div class="balancesTableHead">
-            <div>Program</div>
-            <div>My balance</div>
-            <div style="text-align:right;">Cash-out</div>
-          </div>
-
-          <div id="balancesRows"></div>
-        </div>
-      </div>
-
-      <div class="actions" style="margin-top:12px;">
-        <button id="saveBalancesBtn" type="button">Save balances</button>
-        <button id="clearBalancesBtn" type="button">Reset all saved data</button>
-      </div>
-
-      <div class="status">
-        <span class="badge"><span class="dot" id="saveDot"></span><span id="saveStatus">Not saved yet</span></span>
-        <span class="badge">Tip: Editing a balance auto-saves</span>
-      </div>
-    </section>
 
     <!-- Rates -->
     <section class="card" style="margin-top:14px;">
@@ -618,9 +479,8 @@
       }
     };
 
-    const STORAGE_KEY = "point_stack_balances_v6_silver_balances";
+    const STORAGE_KEY = "point_stack_balances_v8_vertical_breakdown_left";
 
-    // DOM refs
     const programEl = document.getElementById('program');
     const amountLabelEl = document.getElementById('amountLabel');
     const amountInputEl = document.getElementById('amountInput');
@@ -635,19 +495,13 @@
     const copyBtn = document.getElementById('copyBtn');
     const resetCalcBtn = document.getElementById('resetCalcBtn');
 
-    const balancesRowsEl = document.getElementById('balancesRows');
-    const saveBalancesBtn = document.getElementById('saveBalancesBtn');
-    const clearBalancesBtn = document.getElementById('clearBalancesBtn');
-
     const ratesBody = document.getElementById('ratesBody');
-
-    const saveDot = document.getElementById('saveDot');
-    const saveStatus = document.getElementById('saveStatus');
 
     const lastUpdatedTextEl = document.getElementById('lastUpdatedText');
     const exportBtn = document.getElementById('exportBtn');
     const copySummaryBtn = document.getElementById('copySummaryBtn');
     const totalCashoutStackEl = document.getElementById('totalCashoutStack');
+    const stackBreakdownEl = document.getElementById('stackBreakdown');
 
     function formatMoney(amount){
       return new Intl.NumberFormat("en-AU", {
@@ -707,23 +561,11 @@
       }
     }
 
-    function setSavedUI(isSaved){
-      if(isSaved){
-        saveDot.classList.add("ok");
-        saveStatus.textContent = "Saved";
-      }else{
-        saveDot.classList.remove("ok");
-        saveStatus.textContent = "Not saved yet";
-      }
-    }
-
     function saveBalancesNow(){
       localStorage.setItem(STORAGE_KEY, JSON.stringify(BALANCES));
-      setSavedUI(true);
     }
 
     let BALANCES = loadBalances();
-    setSavedUI(!!localStorage.getItem(STORAGE_KEY));
 
     function populateProgramDropdown(){
       programEl.innerHTML = "";
@@ -774,6 +616,34 @@
         total += cashoutFor(k, v);
       }
       totalCashoutStackEl.textContent = formatMoney(total);
+    }
+
+    function updateStackBreakdown(){
+      const items = [];
+      for(const [k, cfg] of Object.entries(PROGRAMS)){
+        const bal = BALANCES[k] || 0;
+        const cashout = cashoutFor(k, bal);
+        if(cashout > 0.00001){
+          const tooltip = cfg.type === "cash"
+            ? `${cfg.name}: ${formatMoney(bal)} balance`
+            : `${cfg.name}: ${formatNumber(bal)} points @ ${rateToText(cfg.dollarsPerPoint)}`;
+          items.push({ name: cfg.name, val: formatMoney(cashout), tooltip, cashout });
+        }
+      }
+
+      // Sort highest first so the most important are top-left
+      items.sort((a,b) => b.cashout - a.cashout);
+
+      stackBreakdownEl.innerHTML = "";
+      if(items.length === 0) return;
+
+      for(const it of items){
+        const div = document.createElement("div");
+        div.className = "item";
+        div.title = it.tooltip;
+        div.innerHTML = `<span class="name">${it.name}</span><span class="val">${it.val}</span>`;
+        stackBreakdownEl.appendChild(div);
+      }
     }
 
     function setCalculatorUIForProgram(){
@@ -829,80 +699,6 @@
       }
     }
 
-    function renderBalances(){
-      balancesRowsEl.innerHTML = "";
-
-      for(const [key, cfg] of Object.entries(PROGRAMS)){
-        const row = document.createElement("div");
-        row.className = "balRow";
-
-        const left = document.createElement("div");
-        const name = document.createElement("div");
-        name.className = "balName";
-        name.textContent = cfg.name;
-
-        const sub = document.createElement("div");
-        sub.className = "balSub";
-        sub.textContent = (cfg.type === "cash") ? "Cash balance (AUD)" : "Points balance";
-
-        left.appendChild(name);
-        left.appendChild(sub);
-
-        const inputWrap = document.createElement("div");
-        const input = document.createElement("input");
-        input.dataset.programKey = key;
-
-        if(cfg.type === "cash"){
-          input.type = "text";
-          input.inputMode = "decimal";
-          input.placeholder = "e.g. $25.00";
-          input.value = BALANCES[key] ? String(BALANCES[key].toFixed(2)) : "";
-        }else{
-          input.type = "text";
-          input.inputMode = "numeric";
-          input.placeholder = "e.g. 25,000";
-          input.value = BALANCES[key] ? formatNumber(BALANCES[key]) : "";
-        }
-        inputWrap.appendChild(input);
-
-        const cash = document.createElement("div");
-        cash.className = "balCash";
-        cash.innerHTML = `
-          <div class="balCashLabel">Cash-out</div>
-          <div class="balCashValue" data-cashout="${key}">${formatMoney(cashoutFor(key, BALANCES[key]))}</div>
-        `;
-
-        input.addEventListener("input", () => {
-          setSavedUI(false);
-
-          const newVal = (cfg.type === "cash") ? parseMoney(input.value) : parsePoints(input.value);
-          BALANCES[key] = newVal;
-
-          const cashEl = balancesRowsEl.querySelector(`[data-cashout="${key}"]`);
-          if(cashEl) cashEl.textContent = formatMoney(cashoutFor(key, newVal));
-
-          if(programEl.value === key){
-            setCalculatorInputFromSaved();
-            updateCalculator(false);
-          }
-
-          updateTotalCashout();
-          updateLastUpdated();
-
-          clearTimeout(renderBalances._saveTimer);
-          renderBalances._saveTimer = setTimeout(() => saveBalancesNow(), 250);
-        });
-
-        row.appendChild(left);
-        row.appendChild(inputWrap);
-        row.appendChild(cash);
-
-        balancesRowsEl.appendChild(row);
-      }
-
-      updateTotalCashout();
-    }
-
     function buildExportText(){
       const lines = [];
       lines.push("Point Stack – Cash-Out Summary (AUD)");
@@ -912,6 +708,7 @@
       for(const [k, cfg] of Object.entries(PROGRAMS)){
         const bal = BALANCES[k] || 0;
         const cashout = cashoutFor(k, bal);
+        if(cashout <= 0.00001) continue;
         total += cashout;
 
         if(cfg.type === "cash"){
@@ -957,29 +754,20 @@
       setTimeout(() => exportBtn.textContent = "Export", 900);
     }
 
-    // Events
-    programEl.addEventListener('change', () => updateCalculator(true));
+    programEl.addEventListener('change', () => {
+      updateCalculator(true);
+    });
 
     amountInputEl.addEventListener('input', () => {
       updateCalculator(false);
 
-      setSavedUI(false);
       const key = programEl.value;
       const cfg = PROGRAMS[key];
       const newVal = (cfg.type === "cash") ? parseMoney(amountInputEl.value) : parsePoints(amountInputEl.value);
       BALANCES[key] = newVal;
 
-      // Sync balances input + cashout
-      const rowInput = balancesRowsEl.querySelector(`input[data-program-key="${key}"]`);
-      if(rowInput){
-        rowInput.value = (cfg.type === "cash")
-          ? (newVal ? String(newVal.toFixed(2)) : "")
-          : (newVal ? formatNumber(newVal) : "");
-      }
-      const cashEl = balancesRowsEl.querySelector(`[data-cashout="${key}"]`);
-      if(cashEl) cashEl.textContent = formatMoney(cashoutFor(key, newVal));
-
       updateTotalCashout();
+      updateStackBreakdown();
       updateLastUpdated();
 
       clearTimeout(amountInputEl._saveTimer);
@@ -999,31 +787,6 @@
       amountInputEl.focus();
     });
 
-    saveBalancesBtn.addEventListener('click', () => {
-      const inputs = balancesRowsEl.querySelectorAll("input[data-program-key]");
-      inputs.forEach(inp => {
-        const k = inp.dataset.programKey;
-        const cfg = PROGRAMS[k];
-        BALANCES[k] = (cfg.type === "cash") ? parseMoney(inp.value) : parsePoints(inp.value);
-      });
-      saveBalancesNow();
-      renderBalances();
-      updateCalculator(false);
-      updateTotalCashout();
-      updateLastUpdated();
-    });
-
-    clearBalancesBtn.addEventListener('click', () => {
-      if(!confirm("This will clear all saved balances on this device/browser. Continue?")) return;
-      localStorage.removeItem(STORAGE_KEY);
-      BALANCES = defaultBalances();
-      setSavedUI(false);
-      renderBalances();
-      updateCalculator(true);
-      updateTotalCashout();
-      updateLastUpdated();
-    });
-
     exportBtn.addEventListener("click", exportSummary);
 
     copySummaryBtn.addEventListener("click", async () => {
@@ -1036,9 +799,9 @@
     // Init
     populateProgramDropdown();
     renderRateTable();
-    renderBalances();
     updateCalculator(true);
     updateTotalCashout();
+    updateStackBreakdown();
     updateLastUpdated();
   </script>
 </body>
