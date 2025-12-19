@@ -115,104 +115,6 @@
       .converterGrid{ grid-template-columns: 1.1fr 0.9fr; }
     }
 
-    /* ===== Balance Cards ===== */
-    .balancesCards{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:12px;
-      margin-top:12px;
-    }
-    @media (min-width: 900px){
-      .balancesCards{ grid-template-columns: 1fr 1fr; }
-    }
-
-    .balCard{
-      border:1px solid var(--border);
-      border-radius:14px;
-      background: rgba(0,0,0,0.18);
-      padding:12px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-    }
-
-    .balTop{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:flex-start;
-      margin-bottom:10px;
-    }
-
-    .balName{
-      font-weight:650;
-      letter-spacing:-0.01em;
-      line-height:1.25;
-    }
-
-    .balCashout{
-      text-align:right;
-      min-width: 92px;
-    }
-
-    .balCashoutLabel{
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:0.08em;
-      color:var(--muted);
-    }
-
-    .balCashoutValue{
-      font-size:18px;
-      font-weight:700;
-      margin-top:2px;
-    }
-
-    .balBottom{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .balBottom input{
-      margin:0;
-    }
-
-    .balHint{
-      margin-top:8px;
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.35;
-    }
-
-    .status{
-      margin-top:10px;
-      font-size:12px;
-      color:var(--muted);
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .badge{
-      display:inline-flex;
-      gap:6px;
-      align-items:center;
-      border:1px solid var(--border);
-      padding:6px 10px;
-      border-radius:999px;
-      background: rgba(0,0,0,0.18);
-    }
-    .dot{ width:8px; height:8px; border-radius:999px; background: var(--warn); }
-    .dot.ok{ background: var(--ok); }
-
-    /* ===== Rates table ===== */
-    .table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
-    .table th, .table td{
-      text-align:left;
-      padding:10px 8px;
-      border-bottom:1px solid var(--border);
-      vertical-align:top;
-    }
-    .table th{ color:var(--muted); font-weight:600; font-size:12px; }
-
     /* ============ Point Stack Total Card ============ */
     .stackCardWrap{ margin-top:14px; }
     .stackCard{
@@ -356,6 +258,188 @@
       .stackAmountBlock{ min-width:unset; }
     }
 
+    /* ============================
+       SILVER SHINY "MY BALANCES" CARD
+       ============================ */
+    .balancesSilverWrap{
+      margin-top:12px;
+      position:relative;
+      border-radius:18px;
+      padding:1px; /* for border glow */
+      background: linear-gradient(135deg,
+        rgba(255,255,255,0.18),
+        rgba(255,255,255,0.06),
+        rgba(255,255,255,0.14));
+      box-shadow:
+        0 24px 55px rgba(0,0,0,0.55),
+        inset 0 1px 0 rgba(255,255,255,0.25);
+      overflow:hidden;
+    }
+    /* brushed metal + shine layers */
+    .balancesSilverWrap::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        /* brushed metal micro-lines */
+        repeating-linear-gradient(90deg,
+          rgba(255,255,255,0.03) 0px,
+          rgba(255,255,255,0.03) 1px,
+          rgba(0,0,0,0.00) 3px,
+          rgba(0,0,0,0.00) 6px),
+        /* soft top highlight */
+        radial-gradient(900px 240px at 20% 0%,
+          rgba(255,255,255,0.20),
+          rgba(255,255,255,0.00) 60%),
+        /* diagonal shine streak */
+        linear-gradient(115deg,
+          rgba(255,255,255,0.00) 0%,
+          rgba(255,255,255,0.08) 30%,
+          rgba(255,255,255,0.18) 36%,
+          rgba(255,255,255,0.06) 44%,
+          rgba(255,255,255,0.00) 70%);
+      mix-blend-mode: overlay;
+      opacity:0.9;
+    }
+
+    .balancesSilver{
+      position:relative;
+      border-radius:18px;
+      padding:14px;
+      background:
+        radial-gradient(900px 280px at 20% 0%,
+          rgba(255,255,255,0.12),
+          rgba(255,255,255,0.00) 55%),
+        linear-gradient(180deg,
+          rgba(255,255,255,0.10),
+          rgba(255,255,255,0.04) 35%,
+          rgba(0,0,0,0.20) 100%);
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.20),
+        inset 0 -1px 0 rgba(0,0,0,0.35);
+      overflow:hidden;
+    }
+
+    .balancesTableHead{
+      display:grid;
+      grid-template-columns: 1fr 220px 140px;
+      gap:10px;
+      padding:10px 10px;
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:14px;
+      background: rgba(0,0,0,0.18);
+      margin-top:12px;
+      color: rgba(229,231,235,0.82);
+      font-size:11px;
+      letter-spacing:0.10em;
+      text-transform:uppercase;
+    }
+
+    .balRow{
+      display:grid;
+      grid-template-columns: 1fr 220px 140px;
+      gap:10px;
+      align-items:center;
+      margin-top:10px;
+      padding:12px 12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.10);
+      background:
+        radial-gradient(600px 160px at 10% 0%,
+          rgba(255,255,255,0.08),
+          rgba(255,255,255,0.00) 55%),
+        linear-gradient(180deg,
+          rgba(0,0,0,0.16),
+          rgba(0,0,0,0.28));
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.10),
+        0 10px 22px rgba(0,0,0,0.28);
+    }
+
+    .balName{
+      font-weight:700;
+      letter-spacing:-0.01em;
+      line-height:1.2;
+    }
+    .balSub{
+      margin-top:4px;
+      font-size:12px;
+      color: rgba(229,231,235,0.70);
+      line-height:1.25;
+    }
+
+    .balCash{
+      text-align:right;
+    }
+    .balCashLabel{
+      font-size:11px;
+      letter-spacing:0.10em;
+      text-transform:uppercase;
+      color: rgba(229,231,235,0.60);
+    }
+    .balCashValue{
+      font-size:16px;
+      font-weight:800;
+      margin-top:2px;
+    }
+
+    /* make inputs look more "inset" on silver card */
+    .balancesSilver input{
+      border-radius:14px;
+      background: rgba(0,0,0,0.28);
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:
+        inset 0 2px 10px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    @media (max-width: 860px){
+      .balancesTableHead, .balRow{
+        grid-template-columns: 1fr 190px 120px;
+      }
+    }
+    @media (max-width: 720px){
+      .balancesTableHead{ display:none; }
+      .balRow{
+        grid-template-columns: 1fr;
+        gap:10px;
+      }
+      .balCash{ text-align:left; }
+    }
+
+    .status{
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .badge{
+      display:inline-flex;
+      gap:6px;
+      align-items:center;
+      border:1px solid var(--border);
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,0.18);
+    }
+    .dot{ width:8px; height:8px; border-radius:999px; background: var(--warn); }
+    .dot.ok{ background: var(--ok); }
+
+    /* ===== Rates table ===== */
+    .table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
+    .table th, .table td{
+      text-align:left;
+      padding:10px 8px;
+      border-bottom:1px solid var(--border);
+      vertical-align:top;
+    }
+    .table th{ color:var(--muted); font-weight:600; font-size:12px; }
+
     footer{ margin-top:16px; color:var(--muted); font-size:12px; line-height:1.45; }
     code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
   </style>
@@ -456,12 +540,22 @@
       </div>
     </div>
 
-    <!-- My balances -->
+    <!-- My balances (silver shiny card) -->
     <section class="card" style="margin-top:14px;">
       <h2>My balances</h2>
       <p class="sub" style="margin-top:-4px;">Store your balances per program. Saved to your browser (localStorage).</p>
 
-      <div class="balancesCards" id="balancesCards"></div>
+      <div class="balancesSilverWrap">
+        <div class="balancesSilver">
+          <div class="balancesTableHead">
+            <div>Program</div>
+            <div>My balance</div>
+            <div style="text-align:right;">Cash-out</div>
+          </div>
+
+          <div id="balancesRows"></div>
+        </div>
+      </div>
 
       <div class="actions" style="margin-top:12px;">
         <button id="saveBalancesBtn" type="button">Save balances</button>
@@ -524,7 +618,7 @@
       }
     };
 
-    const STORAGE_KEY = "point_stack_balances_v4_balance_cards";
+    const STORAGE_KEY = "point_stack_balances_v6_silver_balances";
 
     // DOM refs
     const programEl = document.getElementById('program');
@@ -541,7 +635,7 @@
     const copyBtn = document.getElementById('copyBtn');
     const resetCalcBtn = document.getElementById('resetCalcBtn');
 
-    const balancesCardsEl = document.getElementById('balancesCards');
+    const balancesRowsEl = document.getElementById('balancesRows');
     const saveBalancesBtn = document.getElementById('saveBalancesBtn');
     const clearBalancesBtn = document.getElementById('clearBalancesBtn');
 
@@ -735,45 +829,26 @@
       }
     }
 
-    function renderBalanceCards(){
-      balancesCardsEl.innerHTML = "";
+    function renderBalances(){
+      balancesRowsEl.innerHTML = "";
 
       for(const [key, cfg] of Object.entries(PROGRAMS)){
-        const cashout = cashoutFor(key, BALANCES[key]);
-
-        const card = document.createElement("div");
-        card.className = "balCard";
-
-        const top = document.createElement("div");
-        top.className = "balTop";
+        const row = document.createElement("div");
+        row.className = "balRow";
 
         const left = document.createElement("div");
         const name = document.createElement("div");
         name.className = "balName";
         name.textContent = cfg.name;
 
-        const hint = document.createElement("div");
-        hint.className = "balHint";
-        hint.textContent = (cfg.type === "cash")
-          ? "Enter your cash balance (AUD)."
-          : "Enter your points balance.";
+        const sub = document.createElement("div");
+        sub.className = "balSub";
+        sub.textContent = (cfg.type === "cash") ? "Cash balance (AUD)" : "Points balance";
 
         left.appendChild(name);
-        left.appendChild(hint);
+        left.appendChild(sub);
 
-        const right = document.createElement("div");
-        right.className = "balCashout";
-        right.innerHTML = `
-          <div class="balCashoutLabel">Cash-out</div>
-          <div class="balCashoutValue" data-cashout="${key}">${formatMoney(cashout)}</div>
-        `;
-
-        top.appendChild(left);
-        top.appendChild(right);
-
-        const bottom = document.createElement("div");
-        bottom.className = "balBottom";
-
+        const inputWrap = document.createElement("div");
         const input = document.createElement("input");
         input.dataset.programKey = key;
 
@@ -788,6 +863,14 @@
           input.placeholder = "e.g. 25,000";
           input.value = BALANCES[key] ? formatNumber(BALANCES[key]) : "";
         }
+        inputWrap.appendChild(input);
+
+        const cash = document.createElement("div");
+        cash.className = "balCash";
+        cash.innerHTML = `
+          <div class="balCashLabel">Cash-out</div>
+          <div class="balCashValue" data-cashout="${key}">${formatMoney(cashoutFor(key, BALANCES[key]))}</div>
+        `;
 
         input.addEventListener("input", () => {
           setSavedUI(false);
@@ -795,7 +878,7 @@
           const newVal = (cfg.type === "cash") ? parseMoney(input.value) : parsePoints(input.value);
           BALANCES[key] = newVal;
 
-          const cashEl = balancesCardsEl.querySelector(`[data-cashout="${key}"]`);
+          const cashEl = balancesRowsEl.querySelector(`[data-cashout="${key}"]`);
           if(cashEl) cashEl.textContent = formatMoney(cashoutFor(key, newVal));
 
           if(programEl.value === key){
@@ -806,15 +889,15 @@
           updateTotalCashout();
           updateLastUpdated();
 
-          clearTimeout(renderBalanceCards._saveTimer);
-          renderBalanceCards._saveTimer = setTimeout(() => saveBalancesNow(), 250);
+          clearTimeout(renderBalances._saveTimer);
+          renderBalances._saveTimer = setTimeout(() => saveBalancesNow(), 250);
         });
 
-        bottom.appendChild(input);
+        row.appendChild(left);
+        row.appendChild(inputWrap);
+        row.appendChild(cash);
 
-        card.appendChild(top);
-        card.appendChild(bottom);
-        balancesCardsEl.appendChild(card);
+        balancesRowsEl.appendChild(row);
       }
 
       updateTotalCashout();
@@ -886,14 +969,14 @@
       const newVal = (cfg.type === "cash") ? parseMoney(amountInputEl.value) : parsePoints(amountInputEl.value);
       BALANCES[key] = newVal;
 
-      // Sync the card input + cashout
-      const rowInput = balancesCardsEl.querySelector(`input[data-program-key="${key}"]`);
+      // Sync balances input + cashout
+      const rowInput = balancesRowsEl.querySelector(`input[data-program-key="${key}"]`);
       if(rowInput){
         rowInput.value = (cfg.type === "cash")
           ? (newVal ? String(newVal.toFixed(2)) : "")
           : (newVal ? formatNumber(newVal) : "");
       }
-      const cashEl = balancesCardsEl.querySelector(`[data-cashout="${key}"]`);
+      const cashEl = balancesRowsEl.querySelector(`[data-cashout="${key}"]`);
       if(cashEl) cashEl.textContent = formatMoney(cashoutFor(key, newVal));
 
       updateTotalCashout();
@@ -917,14 +1000,14 @@
     });
 
     saveBalancesBtn.addEventListener('click', () => {
-      const inputs = balancesCardsEl.querySelectorAll("input[data-program-key]");
+      const inputs = balancesRowsEl.querySelectorAll("input[data-program-key]");
       inputs.forEach(inp => {
         const k = inp.dataset.programKey;
         const cfg = PROGRAMS[k];
         BALANCES[k] = (cfg.type === "cash") ? parseMoney(inp.value) : parsePoints(inp.value);
       });
       saveBalancesNow();
-      renderBalanceCards();
+      renderBalances();
       updateCalculator(false);
       updateTotalCashout();
       updateLastUpdated();
@@ -935,7 +1018,7 @@
       localStorage.removeItem(STORAGE_KEY);
       BALANCES = defaultBalances();
       setSavedUI(false);
-      renderBalanceCards();
+      renderBalances();
       updateCalculator(true);
       updateTotalCashout();
       updateLastUpdated();
@@ -953,7 +1036,7 @@
     // Init
     populateProgramDropdown();
     renderRateTable();
-    renderBalanceCards();
+    renderBalances();
     updateCalculator(true);
     updateTotalCashout();
     updateLastUpdated();
