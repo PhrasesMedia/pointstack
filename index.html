@@ -113,8 +113,44 @@
       .converterGrid{ grid-template-columns: 1.1fr 0.9fr; }
     }
 
+    /* ✅ Converter compact mode (keeps focus on Point Stack card) */
+    .converterCard{ padding:14px; }
+    .converterCard h2{ font-size:15px; margin-bottom:8px; }
+
+    .converterRightNote{ margin-top:12px; } /* the bottom dashed note on the result side */
+
+    /* Mobile: make converter noticeably smaller */
+    @media (max-width: 520px){
+      header{ margin-bottom:14px; }
+      .wrap{ padding:20px 14px 40px; }
+      h1{ font-size:24px; }
+
+      .converterCard{ padding:12px; }
+      .converterCard h2{ font-size:14px; }
+
+      label{ font-size:11px; margin:10px 0 5px; }
+      input, select{ padding:10px 11px; border-radius:12px; font-size:14px; }
+
+      .hint{ font-size:11px; margin-top:7px; }
+
+      .note{ padding:10px; font-size:11px; margin-top:10px; }
+
+      .big{ font-size:30px; }
+
+      .meta{ gap:8px; margin-top:8px; }
+      .meta span{ padding:7px 9px; font-size:11px; }
+
+      .actions{ gap:8px; margin-top:8px; }
+      button{ padding:9px 11px; font-size:12px; border-radius:12px; }
+
+      /* Optional: hide the SECOND dashed note on mobile to reduce height */
+      .converterRightNote{ display:none; }
+    }
+
+    /* Slightly reduce spacing so the red card appears sooner */
+    .stackCardWrap{ margin-top:12px; }
+
     /* ============ Point Stack Total Card ============ */
-    .stackCardWrap{ margin-top:14px; }
     .stackCard{
       position:relative;
       overflow:hidden;
@@ -236,13 +272,13 @@
       color: rgba(255,255,255,0.98);
     }
 
-    /* ✅ NEW: Vertical breakdown pinned to the left side */
+    /* Breakdown: vertical, left */
     .stackBreakdown{
       margin-top:10px;
       position:relative;
       z-index:1;
       width: min(360px, 72%);
-      padding-left: 56px; /* lines up under the chip */
+      padding-left: 56px;
       display:flex;
       flex-direction:column;
       gap:6px;
@@ -310,13 +346,10 @@
       .stackActions{ justify-content:flex-start; }
       .stackMid{ align-items:flex-start; }
       .stackAmountBlock{ min-width:unset; }
-      .stackBreakdown{
-        width: 100%;
-        padding-left: 0;
-      }
+      .stackBreakdown{ width: 100%; padding-left: 0; }
     }
 
-    /* ===== Rates table ===== */
+    /* Rates table */
     .table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
     .table th, .table td{
       text-align:left;
@@ -341,8 +374,8 @@
       <div class="pill">AUD • cash-out</div>
     </header>
 
-    <!-- Converter (merged) -->
-    <section class="card">
+    <!-- Converter (compact) -->
+    <section class="card converterCard">
       <h2>Converter</h2>
 
       <div class="converterGrid">
@@ -380,14 +413,14 @@
             <button id="resetCalcBtn" type="button">Reset</button>
           </div>
 
-          <div class="note">
+          <div class="note converterRightNote">
             Everyday Rewards is treated as a <b>cash balance</b>. Points programs use the fixed rates below (editable).
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Total results card -->
+    <!-- Point Stack Card -->
     <div class="stackCardWrap" aria-label="Total cash-out across all programs">
       <div class="stackCard">
         <div class="stackTop">
@@ -415,7 +448,6 @@
           </div>
         </div>
 
-        <!-- Breakdown (vertical, left-aligned) -->
         <div class="stackBreakdown" id="stackBreakdown" aria-label="Cash-out breakdown"></div>
 
         <div class="stackBottom">
@@ -479,7 +511,7 @@
       }
     };
 
-    const STORAGE_KEY = "point_stack_balances_v8_vertical_breakdown_left";
+    const STORAGE_KEY = "point_stack_balances_v9_compact_converter";
 
     const programEl = document.getElementById('program');
     const amountLabelEl = document.getElementById('amountLabel');
@@ -631,7 +663,6 @@
         }
       }
 
-      // Sort highest first so the most important are top-left
       items.sort((a,b) => b.cashout - a.cashout);
 
       stackBreakdownEl.innerHTML = "";
@@ -691,7 +722,7 @@
       if(cfg.type === "cash"){
         metaAmountEl.textContent = formatMoney(balanceVal) + " balance";
         metaRateEl.textContent = "Rate: 1:1 cash";
-        rateNoteEl.innerHTML = `<b>${cfg.name}</b> is treated as cash — no conversion.`;
+        rateNoteEl.innerHTML = `<b>Using:</b> ${cfg.name} as cash — no conversion.`;
       }else{
         metaAmountEl.textContent = `${formatNumber(balanceVal)} points`;
         metaRateEl.textContent = `Rate: ${rateToText(cfg.dollarsPerPoint)}`;
