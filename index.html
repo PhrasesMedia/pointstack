@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Point Stack – Points Cash-Out Converter</title>
-  <meta name="description" content="Point Stack: convert Flybuys, Amex, and Velocity points to a cash-out estimate, include Everyday Rewards cash, and export a summary." />
+  <title>Cash-out estimator for rewards programs</title>
+  <meta name="description" content="Estimate the cash-out value of Flybuys, Everyday Rewards, Velocity and Amex points in Australian dollars." />
 
   <style>
     :root{
@@ -76,16 +76,6 @@
     }
     button:hover{ background: rgba(255,255,255,0.10); }
 
-    .note{
-      margin-top:12px;
-      padding:12px;
-      border-radius:12px;
-      border:1px dashed rgba(255,255,255,0.18);
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.45;
-    }
-
     .meta{
       display:flex;
       flex-wrap:wrap;
@@ -107,8 +97,8 @@
     .converterCard label{ font-size:11px; margin:8px 0 4px; }
     .converterCard input, .converterCard select{ padding:9px 10px; font-size:13px; }
     .converterCard .hint{ font-size:10.5px; margin-top:6px; }
-    .converterCard .note{ display:none; } /* hide dashed note boxes to shrink height */
-    .converterGrid{ display:block; } /* remove 2-column layout */
+    .converterGrid{ display:block; }
+
     .resultInline{
       margin-top:10px;
       display:flex;
@@ -171,21 +161,10 @@
       opacity:0.38;
     }
 
-    .stackTop{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; position:relative; z-index:1; }
-    .stackBrand{ display:flex; flex-direction:column; gap:4px; min-width: 180px; }
+    .stackTop{ position:relative; z-index:1; }
+    .stackBrand{ display:flex; flex-direction:column; gap:4px; }
     .stackBrandName{ font-weight:700; letter-spacing:0.06em; text-transform:uppercase; font-size:13px; opacity:0.95; }
     .stackTagline{ font-size:12px; color: rgba(255,255,255,0.84); opacity:0.95; }
-
-    .stackActions{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
-    .stackBtn{
-      padding:8px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,0.22);
-      background: rgba(0,0,0,0.20);
-      font-size:12px;
-      color: rgba(255,255,255,0.92);
-    }
-    .stackBtn:hover{ background: rgba(0,0,0,0.28); }
 
     .stackMid{
       display:flex;
@@ -319,7 +298,6 @@
     @media (max-width: 520px){
       .stackDigits{ display:none; }
       .stackAmount{ font-size:26px; }
-      .stackActions{ justify-content:flex-start; }
       .stackMid{ align-items:flex-start; }
       .stackAmountBlock{ min-width:unset; }
       .stackBreakdown{ width: 100%; padding-left: 0; }
@@ -344,7 +322,7 @@
   <div class="wrap">
     <header>
       <div class="brand">
-        <h1>Point Stack</h1>
+        <h1>Cash-out estimator for rewards programs</h1>
         <p class="sub">Cash-out estimate + saved balances (stored locally in your browser).</p>
       </div>
       <div class="pill">AUD • cash-out</div>
@@ -394,11 +372,6 @@
             <div class="stackBrandName">POINT STACK</div>
             <div class="stackTagline">Total cash-out across all programs</div>
           </div>
-
-          <div class="stackActions">
-            <button class="stackBtn" id="exportBtn" type="button">Export</button>
-            <button class="stackBtn" id="copySummaryBtn" type="button">Copy summary</button>
-          </div>
         </div>
 
         <div class="stackMid">
@@ -429,22 +402,22 @@
 
     <!-- Rates -->
     <section class="card" style="margin-top:14px;">
-      <h2>Rates used (editable)</h2>
-      <p class="sub" style="margin-top:-4px;">Everyday Rewards is cash (no rate). Update “dollars per point” for points programs in the script.</p>
+      <h2>Rates used</h2>
+      <p class="sub" style="margin-top:-4px;">Everyday Rewards is treated as a cash balance. The other programs use fixed cash-equivalent rates.</p>
 
       <table class="table">
         <thead>
           <tr>
             <th>Program</th>
             <th>Cash-out rate</th>
-            <th>Meaning</th>
+            <th>Notes</th>
           </tr>
         </thead>
         <tbody id="ratesBody"></tbody>
       </table>
 
       <footer>
-        Add more programs by editing the <code>PROGRAMS</code> object in the script.
+        These are cash-equivalent estimates for quick comparison.
       </footer>
     </section>
   </div>
@@ -454,26 +427,26 @@
       flybuys: {
         name: "Flybuys",
         type: "points",
-        dollarsPerPoint: 0.005, // EDIT ME
-        meaning: "Placeholder. Set to the Flybuys cash-out method you want (dollars off / gift card equivalent)."
+        dollarsPerPoint: 0.005,
+        note: "Cash-equivalent estimate per point."
       },
       everyday_rewards: {
         name: "Woolworths Everyday Rewards",
         type: "cash",
         dollarsPerPoint: null,
-        meaning: "Cash balance (AUD). No points conversion."
+        note: "Cash balance (AUD). No conversion."
       },
       velocity: {
         name: "Velocity Frequent Flyer",
         type: "points",
-        dollarsPerPoint: 0.003, // EDIT ME
-        meaning: "Placeholder. For cash-out only, set to a cash-like redemption (not flights)."
+        dollarsPerPoint: 0.003,
+        note: "Cash-equivalent estimate per point."
       },
       amex_mr: {
         name: "Amex Membership Rewards",
         type: "points",
-        dollarsPerPoint: 0.005, // EDIT ME
-        meaning: "Placeholder. Set to the Amex cash-out option you want to represent."
+        dollarsPerPoint: 0.005,
+        note: "Cash-equivalent estimate per point."
       }
     };
 
@@ -494,8 +467,6 @@
     const ratesBody = document.getElementById('ratesBody');
 
     const lastUpdatedTextEl = document.getElementById('lastUpdatedText');
-    const exportBtn = document.getElementById('exportBtn');
-    const copySummaryBtn = document.getElementById('copySummaryBtn');
     const totalCashoutStackEl = document.getElementById('totalCashoutStack');
     const stackBreakdownEl = document.getElementById('stackBreakdown');
 
@@ -578,18 +549,19 @@
       ratesBody.innerHTML = "";
       for(const cfg of Object.values(PROGRAMS)){
         const tr = document.createElement("tr");
+
         const tdName = document.createElement("td");
         tdName.textContent = cfg.name;
 
         const tdRate = document.createElement("td");
         tdRate.textContent = (cfg.type === "cash") ? "— (cash)" : rateToText(cfg.dollarsPerPoint);
 
-        const tdMeaning = document.createElement("td");
-        tdMeaning.textContent = cfg.meaning;
+        const tdNote = document.createElement("td");
+        tdNote.textContent = cfg.note;
 
         tr.appendChild(tdName);
         tr.appendChild(tdRate);
-        tr.appendChild(tdMeaning);
+        tr.appendChild(tdNote);
         ratesBody.appendChild(tr);
       }
     }
@@ -649,10 +621,14 @@
         amountLabelEl.textContent = "Cash amount (AUD)";
         amountInputEl.placeholder = "e.g. $25.00";
         amountInputEl.inputMode = "decimal";
+        document.getElementById("hintText").innerHTML =
+          `Tip: Enter a cash balance (e.g. <b>$25</b>). Switching programs loads your saved balance.`;
       }else{
         amountLabelEl.textContent = "Points";
         amountInputEl.placeholder = "e.g. 50,000";
         amountInputEl.inputMode = "numeric";
+        document.getElementById("hintText").innerHTML =
+          `Tip: Commas work (e.g. <b>120,000</b>). Switching programs loads your saved balance.`;
       }
     }
 
@@ -689,33 +665,6 @@
       }
     }
 
-    function buildExportText(){
-      const lines = [];
-      lines.push("Point Stack – Cash-Out Summary (AUD)");
-      lines.push("-----------------------------------");
-
-      let total = 0;
-      for(const [k, cfg] of Object.entries(PROGRAMS)){
-        const bal = BALANCES[k] || 0;
-        const cashout = cashoutFor(k, bal);
-        if(cashout <= 0.00001) continue;
-        total += cashout;
-
-        if(cfg.type === "cash"){
-          lines.push(`${cfg.name}: ${formatMoney(bal)} balance → ${formatMoney(cashout)}`);
-        }else{
-          lines.push(`${cfg.name}: ${formatNumber(bal)} points → ${formatMoney(cashout)} (rate ${rateToText(cfg.dollarsPerPoint)})`);
-        }
-      }
-
-      lines.push("-----------------------------------");
-      lines.push(`TOTAL: ${formatMoney(total)}`);
-      if(lastUpdatedTextEl?.textContent && lastUpdatedTextEl.textContent !== "Last updated: —"){
-        lines.push(lastUpdatedTextEl.textContent);
-      }
-      return lines.join("\n");
-    }
-
     async function copyToClipboard(text){
       try{
         await navigator.clipboard.writeText(text);
@@ -729,19 +678,6 @@
         ta.remove();
         return true;
       }
-    }
-
-    async function exportSummary(){
-      const text = buildExportText();
-      if(navigator.share){
-        try{
-          await navigator.share({ title: "Point Stack Summary", text });
-          return;
-        }catch(e){ /* fall back */ }
-      }
-      await copyToClipboard(text);
-      exportBtn.textContent = "Exported!";
-      setTimeout(() => exportBtn.textContent = "Export", 900);
     }
 
     programEl.addEventListener('change', () => {
@@ -775,15 +711,6 @@
       amountInputEl.value = "";
       updateCalculator(false);
       amountInputEl.focus();
-    });
-
-    exportBtn.addEventListener("click", exportSummary);
-
-    copySummaryBtn.addEventListener("click", async () => {
-      const text = buildExportText();
-      await copyToClipboard(text);
-      copySummaryBtn.textContent = "Copied!";
-      setTimeout(() => copySummaryBtn.textContent = "Copy summary", 900);
     });
 
     // Init
