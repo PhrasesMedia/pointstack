@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Points Cash-Out Converter</title>
+  <meta name="description" content="Convert Flybuys, Amex, and Velocity points to an estimated cash-out value, store balances, include Everyday Rewards cash, and show a total." />
+
+  <style>
+    :root{
+      --bg:#0b0f17;
+      --muted:#9ca3af;
+      --text:#e5e7eb;
+      --border:rgba(255,255,255,0.08);
+      --shadow: 0 12px 30px rgba(0,0,0,0.35);
+      --radius:16px;
+      --ok:#a7f3d0;
+      --warn:#fde68a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background: radial-gradient(1200px 700px at 20% 0%, #1f2a44 0%, transparent 60%),
+                  radial-gradient(900px 500px at 90% 10%, #2a1f44 0%, transparent 60%),
+                  var(--bg);
+    }
+    .wrap{ max-width:980px; margin:0 auto; padding:28px 18px 48px; }
+    header{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    .brand{ display:flex; flex-direction:column; gap:6px; }
+    h1{ margin:0; font-size:28px; line-height:1.15; letter-spacing:-0.02em; }
+    .sub{ margin:0; color:var(--muted); font-size:14px; line-height:1.45; }
+    .pill{
+      padding:8px 10px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      color:var(--muted);
+      font-size:12px;
+      align-self:flex-start;
+      white-space:nowrap;
+    }
+
+    .grid{ display:grid; grid-template-columns: 1fr; gap:14px; margin-top:14px; }
+    @media (min-width: 900px){ .grid{ grid-template-columns: 1.05fr 0.95fr; } }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:16px;
+    }
+    .card h2{ margin:0 0 10px 0; font-size:16px; letter-spacing:-0.01em; }
+
+    label{ display:block; color:var(--muted); font-size:12px; margin:12px 0 6px; }
+    .row{ display:grid; grid-template-columns: 1fr; gap:10px; }
+    @media (min-width: 560px){ .row{ grid-template-columns: 1fr 1fr; } }
+
+    input, select{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,0.22);
+      color: var(--text);
+      outline:none;
+      font-size:14px;
+    }
+    input:focus, select:focus{ border-color: rgba(255,255,255,0.22); }
+
+    .hint{ color:var(--muted); font-size:12px; margin-top:8px; line-height:1.45; }
+
+    .result{ display:flex; flex-direction:column; gap:10px; }
+    .big{ font-size:34px; letter-spacing:-0.03em; margin:2px 0 0; }
+
+    .meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .meta span{
+      border:1px solid var(--border);
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,0.18);
+    }
+
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+    button{
+      cursor:pointer;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+      color:var(--text);
+      font-size:13px;
+    }
+    button:hover{ background: rgba(255,255,255,0.10); }
+
+    .note{
+      margin-top:12px;
+      padding:12px;
+      border-radius:12px;
+      border:1px dashed rgba(255,255,255,0.18);
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
+    .table th, .table td{
+      text-align:left;
+      padding:10px 8px;
+      border-bottom:1px solid var(--border);
+      vertical-align:top;
+    }
+    .table th{ color:var(--muted); font-weight:600; font-size:12px; }
+
+    .status{
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .badge{
+      display:inline-flex;
+      gap:6px;
+      align-items:center;
+      border:1px solid var(--border);
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,0.18);
+    }
+    .dot{ width:8px; height:8px; border-radius:999px; background: var(--warn); }
+    .dot.ok{ background: var(--ok); }
+
+    .totalRow{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:12px;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      align-items:baseline;
+    }
+    .totalRow .label{ color:var(--muted); font-size:12px; }
+    .totalRow .value{ font-size:20px; letter-spacing:-0.02em; }
+
+    footer{ margin-top:16px; color:var(--muted); font-size:12px; line-height:1.45; }
+    code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <h1>Points Cash-Out Converter</h1>
+        <p class="sub">Cash-out estimate + saved balances (stored locally in your browser).</p>
+      </div>
+      <div class="pill">AUD • cash-out</div>
+    </header>
+
+    <div class="grid">
+      <!-- Inputs -->
+      <section class="card">
+        <h2>Convert</h2>
+
+        <div class="row">
+          <div>
+            <label for="program">Program</label>
+            <select id="program"></select>
+          </div>
+
+          <div>
+            <label id="amountLabel" for="amountInput">Points</label>
+            <input id="amountInput" type="text" inputmode="decimal" placeholder="e.g. 50,000" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="rounding">Rounding</label>
+            <select id="rounding">
+              <option value="2">2 decimals (e.g. $12.34)</option>
+              <option value="0">No decimals (e.g. $12)</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="currency">Currency</label>
+            <select id="currency" disabled>
+              <option value="AUD">AUD ($)</option>
+            </select>
+          </div>
+        </div>
+
+        <p class="hint" id="hintText">
+          Tip: Commas work (e.g. <b>120,000</b>). Switching programs loads your saved balance.
+        </p>
+
+        <div class="note" id="rateNote"></div>
+      </section>
+
+      <!-- Result -->
+      <section class="card">
+        <h2>Cash-out value</h2>
+
+        <div class="result">
+          <div>
+            <div class="sub" id="resultLabel">Estimated value</div>
+            <div class="big" id="resultValue">$0.00</div>
+          </div>
+
+          <div class="meta">
+            <span id="metaAmount">0 points</span>
+            <span id="metaRate">Rate: —</span>
+          </div>
+
+          <div class="actions">
+            <button id="copyBtn" type="button">Copy result</button>
+            <button id="resetCalcBtn" type="button">Reset calculator</button>
+          </div>
+
+          <div class="note">
+            Everyday Rewards is treated as a <b>cash balance</b>. Points programs use the fixed rates below (editable).
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Saved balances -->
+    <section class="card" style="margin-top:14px;">
+      <h2>My balances</h2>
+      <p class="sub" style="margin-top:-4px;">Store your balances per program. Saved to your browser (localStorage).</p>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:34%;">Program</th>
+            <th style="width:33%;">My balance</th>
+            <th style="width:33%;">Cash-out</th>
+          </tr>
+        </thead>
+        <tbody id="balancesBody"></tbody>
+      </table>
+
+      <div class="totalRow">
+        <div>
+          <div class="label">Total cash-out across all programs</div>
+        </div>
+        <div class="value" id="totalCashout">$0.00</div>
+      </div>
+
+      <div class="actions" style="margin-top:12px;">
+        <button id="saveBalancesBtn" type="button">Save balances</button>
+        <button id="clearBalancesBtn" type="button">Reset all saved data</button>
+      </div>
+
+      <div class="status">
+        <span class="badge"><span class="dot" id="saveDot"></span><span id="saveStatus">Not saved yet</span></span>
+        <span class="badge">Tip: Editing a balance auto-saves</span>
+      </div>
+    </section>
+
+    <!-- Rates -->
+    <section class="card" style="margin-top:14px;">
+      <h2>Rates used (editable)</h2>
+      <p class="sub" style="margin-top:-4px;">Everyday Rewards is cash (no rate). Update “dollars per point” for points programs in the script.</p>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Program</th>
+            <th>Cash-out rate</th>
+            <th>Meaning</th>
+          </tr>
+        </thead>
+        <tbody id="ratesBody"></tbody>
+      </table>
+
+      <footer>
+        Add more programs by editing the <code>PROGRAMS</code> object in the script.
+      </footer>
+    </section>
+  </div>
+
+  <script>
+    // ======================================
+    // EDIT THESE PROGRAM SETTINGS / CASH RATES
+    // ======================================
+    // type:
+    // - "points": user stores points, cash-out = points * dollarsPerPoint
+    // - "cash":   user stores cash directly (AUD), cash-out = cash
+    const PROGRAMS = {
+      flybuys: {
+        name: "Flybuys",
+        type: "points",
+        dollarsPerPoint: 0.005, // EDIT ME
+        meaning: "Placeholder. Set to the Flybuys cash-out method you want (dollars off / gift card equivalent)."
+      },
+      everyday_rewards: {
+        name: "Woolworths Everyday Rewards",
+        type: "cash",
+        dollarsPerPoint: null,
+        meaning: "Cash balance (AUD). No points conversion."
+      },
+      velocity: {
+        name: "Velocity Frequent Flyer",
+        type: "points",
+        dollarsPerPoint: 0.003, // EDIT ME
+        meaning: "Placeholder. For cash-out only, set to a cash-like redemption (not flights)."
+      },
+      amex_mr: {
+        name: "Amex Membership Rewards",
+        type: "points",
+        dollarsPerPoint: 0.005, // EDIT ME
+        meaning: "Placeholder. Set to the Amex cash-out option you want to represent."
+      }
+    };
+
+    const STORAGE_KEY = "points_converter_balances_v2"; // bump version from v1
+
+    // DOM refs
+    const programEl = document.getElementById('program');
+    const amountLabelEl = document.getElementById('amountLabel');
+    const amountInputEl = document.getElementById('amountInput');
+    const roundingEl = document.getElementById('rounding');
+
+    const resultValueEl = document.getElementById('resultValue');
+    const resultLabelEl = document.getElementById('resultLabel');
+    const metaAmountEl = document.getElementById('metaAmount');
+    const metaRateEl = document.getElementById('metaRate');
+    const rateNoteEl = document.getElementById('rateNote');
+    const hintTextEl = document.getElementById('hintText');
+
+    const copyBtn = document.getElementById('copyBtn');
+    const resetCalcBtn = document.getElementById('resetCalcBtn');
+
+    const balancesBody = document.getElementById('balancesBody');
+    const saveBalancesBtn = document.getElementById('saveBalancesBtn');
+    const clearBalancesBtn = document.getElementById('clearBalancesBtn');
+
+    const ratesBody = document.getElementById('ratesBody');
+    const totalCashoutEl = document.getElementById('totalCashout');
+
+    const saveDot = document.getElementById('saveDot');
+    const saveStatus = document.getElementById('saveStatus');
+
+    function formatMoney(amount, decimals=2){
+      const opts = {
+        style: "currency",
+        currency: "AUD",
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      };
+      return new Intl.NumberFormat("en-AU", opts).format(amount || 0);
+    }
+
+    function formatNumber(n){
+      return new Intl.NumberFormat("en-AU").format(n);
+    }
+
+    function parsePoints(input){
+      const cleaned = String(input).replace(/[,\s]/g, '');
+      if(!cleaned) return 0;
+      const num = Number(cleaned);
+      return Number.isFinite(num) && num > 0 ? Math.floor(num) : 0;
+    }
+
+    function parseMoney(input){
+      // allow commas, $, spaces
+      const cleaned = String(input).replace(/[$,\s]/g, '');
+      if(!cleaned) return 0;
+      const num = Number(cleaned);
+      if(!Number.isFinite(num) || num <= 0) return 0;
+      // keep 2dp
+      return Math.round(num * 100) / 100;
+    }
+
+    function rateToText(dollarsPerPoint){
+      const centsPerPoint = dollarsPerPoint * 100;
+      const cents = (Math.round(centsPerPoint * 1000) / 1000);
+      return `${cents}¢/point`;
+    }
+
+    function cashoutFor(programKey, balanceValue){
+      const p = PROGRAMS[programKey];
+      if(!p) return 0;
+      if(p.type === "cash") return balanceValue || 0;
+      return (balanceValue || 0) * (p.dollarsPerPoint || 0);
+    }
+
+    function defaultBalances(){
+      const obj = {};
+      for(const k of Object.keys(PROGRAMS)) obj[k] = 0;
+      return obj;
+    }
+
+    function loadBalances(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return defaultBalances();
+        const parsed = JSON.parse(raw);
+        const merged = defaultBalances();
+        for(const [k, p] of Object.entries(PROGRAMS)){
+          if(p.type === "cash") merged[k] = parseMoney(parsed?.[k] ?? 0);
+          else merged[k] = parsePoints(parsed?.[k] ?? 0);
+        }
+        return merged;
+      }catch(e){
+        return defaultBalances();
+      }
+    }
+
+    function setSavedUI(isSaved){
+      if(isSaved){
+        saveDot.classList.add("ok");
+        saveStatus.textContent = "Saved";
+      }else{
+        saveDot.classList.remove("ok");
+        saveStatus.textContent = "Not saved yet";
+      }
+    }
+
+    function saveBalancesNow(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(BALANCES));
+      setSavedUI(true);
+    }
+
+    let BALANCES = loadBalances();
+    setSavedUI(!!localStorage.getItem(STORAGE_KEY));
+
+    function populateProgramDropdown(){
+      programEl.innerHTML = "";
+      for(const [key, cfg] of Object.entries(PROGRAMS)){
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = cfg.name;
+        programEl.appendChild(opt);
+      }
+      programEl.value = "flybuys";
+    }
+
+    function renderRateTable(){
+      ratesBody.innerHTML = "";
+      for(const cfg of Object.values(PROGRAMS)){
+        const tr = document.createElement("tr");
+
+        const tdName = document.createElement("td");
+        tdName.textContent = cfg.name;
+
+        const tdRate = document.createElement("td");
+        tdRate.textContent = (cfg.type === "cash") ? "— (cash)" : rateToText(cfg.dollarsPerPoint);
+
+        const tdMeaning = document.createElement("td");
+        tdMeaning.textContent = cfg.meaning;
+
+        tr.appendChild(tdName);
+        tr.appendChild(tdRate);
+        tr.appendChild(tdMeaning);
+        ratesBody.appendChild(tr);
+      }
+    }
+
+    function renderBalancesTable(){
+      balancesBody.innerHTML = "";
+
+      for(const [key, cfg] of Object.entries(PROGRAMS)){
+        const tr = document.createElement("tr");
+
+        const tdName = document.createElement("td");
+        tdName.textContent = cfg.name;
+
+        const tdInput = document.createElement("td");
+        const input = document.createElement("input");
+        input.dataset.programKey = key;
+
+        if(cfg.type === "cash"){
+          input.type = "text";
+          input.inputMode = "decimal";
+          input.placeholder = "e.g. $25.00";
+          input.value = BALANCES[key] ? String(BALANCES[key].toFixed(2)) : "";
+        }else{
+          input.type = "text";
+          input.inputMode = "numeric";
+          input.placeholder = "e.g. 25,000";
+          input.value = BALANCES[key] ? formatNumber(BALANCES[key]) : "";
+        }
+
+        const tdCash = document.createElement("td");
+        tdCash.dataset.cashcell = "1";
+        tdCash.textContent = formatMoney(cashoutFor(key, BALANCES[key]), 2);
+
+        input.addEventListener("input", () => {
+          setSavedUI(false);
+
+          const newVal = (cfg.type === "cash") ? parseMoney(input.value) : parsePoints(input.value);
+          BALANCES[key] = newVal;
+
+          tdCash.textContent = formatMoney(cashoutFor(key, newVal), 2);
+
+          // if currently selected program, sync calculator input
+          if(programEl.value === key){
+            setCalculatorInputFromSaved();
+            updateCalculator(false);
+          }
+
+          updateTotalCashout();
+
+          clearTimeout(renderBalancesTable._saveTimer);
+          renderBalancesTable._saveTimer = setTimeout(() => saveBalancesNow(), 250);
+        });
+
+        tdInput.appendChild(input);
+
+        tr.appendChild(tdName);
+        tr.appendChild(tdInput);
+        tr.appendChild(tdCash);
+        balancesBody.appendChild(tr);
+      }
+
+      updateTotalCashout();
+    }
+
+    function updateTotalCashout(){
+      let total = 0;
+      for(const [k, v] of Object.entries(BALANCES)){
+        total += cashoutFor(k, v);
+      }
+      totalCashoutEl.textContent = formatMoney(total, 2);
+    }
+
+    function setCalculatorUIForProgram(){
+      const key = programEl.value;
+      const cfg = PROGRAMS[key];
+
+      if(cfg.type === "cash"){
+        amountLabelEl.textContent = "Cash amount (AUD)";
+        amountInputEl.placeholder = "e.g. $25.00";
+        amountInputEl.inputMode = "decimal";
+        hintTextEl.innerHTML = `Tip: Enter a cash balance (e.g. <b>$25</b>). Switching programs loads your saved balance.`;
+      }else{
+        amountLabelEl.textContent = "Points";
+        amountInputEl.placeholder = "e.g. 50,000";
+        amountInputEl.inputMode = "numeric";
+        hintTextEl.innerHTML = `Tip: Commas work (e.g. <b>120,000</b>). Switching programs loads your saved balance.`;
+      }
+    }
+
+    function setCalculatorInputFromSaved(){
+      const key = programEl.value;
+      const cfg = PROGRAMS[key];
+      const saved = BALANCES[key] || 0;
+
+      if(cfg.type === "cash"){
+        amountInputEl.value = saved ? String(saved.toFixed(2)) : "";
+      }else{
+        amountInputEl.value = saved ? formatNumber(saved) : "";
+      }
+    }
+
+    function updateCalculator(overrideFromSaved=false){
+      const key = programEl.value;
+      const cfg = PROGRAMS[key];
+
+      setCalculatorUIForProgram();
+      if(overrideFromSaved) setCalculatorInputFromSaved();
+
+      const decimals = Number(roundingEl.value);
+
+      let raw = amountInputEl.value;
+      let balanceVal = (cfg.type === "cash") ? parseMoney(raw) : parsePoints(raw);
+
+      const value = cashoutFor(key, balanceVal);
+
+      resultLabelEl.textContent = `${cfg.name} cash-out value`;
+      resultValueEl.textContent = formatMoney(value, decimals);
+
+      if(cfg.type === "cash"){
+        metaAmountEl.textContent = formatMoney(balanceVal, 2) + " balance";
+        metaRateEl.textContent = "Rate: 1:1 cash";
+        rateNoteEl.innerHTML = `<b>${cfg.name}</b> is treated as cash — no conversion.`;
+      }else{
+        metaAmountEl.textContent = `${formatNumber(balanceVal)} points`;
+        metaRateEl.textContent = `Rate: ${rateToText(cfg.dollarsPerPoint)}`;
+        rateNoteEl.innerHTML = `<b>Using:</b> ${cfg.name} at <b>${rateToText(cfg.dollarsPerPoint)}</b>. Edit rates in <code>PROGRAMS</code>.`;
+      }
+    }
+
+    // Events
+    programEl.addEventListener('change', () => {
+      updateCalculator(true);
+    });
+
+    roundingEl.addEventListener('change', () => updateCalculator(false));
+
+    amountInputEl.addEventListener('input', () => {
+      updateCalculator(false);
+
+      // Keep saved balance in sync with calculator typing
+      setSavedUI(false);
+      const key = programEl.value;
+      const cfg = PROGRAMS[key];
+      const newVal = (cfg.type === "cash") ? parseMoney(amountInputEl.value) : parsePoints(amountInputEl.value);
+      BALANCES[key] = newVal;
+
+      const rowInput = balancesBody.querySelector(`input[data-program-key="${key}"]`);
+      if(rowInput){
+        rowInput.value = (cfg.type === "cash")
+          ? (newVal ? String(newVal.toFixed(2)) : "")
+          : (newVal ? formatNumber(newVal) : "");
+
+        const cashCell = rowInput.closest("tr").querySelector("[data-cashcell='1']");
+        cashCell.textContent = formatMoney(cashoutFor(key, newVal), 2);
+      }
+
+      updateTotalCashout();
+
+      clearTimeout(amountInputEl._saveTimer);
+      amountInputEl._saveTimer = setTimeout(() => saveBalancesNow(), 300);
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      const text = `${resultLabelEl.textContent}: ${resultValueEl.textContent} (${metaAmountEl.textContent}, ${metaRateEl.textContent})`;
+      try{
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => copyBtn.textContent = "Copy result", 900);
+      }catch(e){
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => copyBtn.textContent = "Copy result", 900);
+      }
+    });
+
+    resetCalcBtn.addEventListener('click', () => {
+      amountInputEl.value = "";
+      roundingEl.value = "2";
+      updateCalculator(false);
+      amountInputEl.focus();
+    });
+
+    saveBalancesBtn.addEventListener('click', () => {
+      // pull latest values from table
+      const inputs = balancesBody.querySelectorAll("input[data-program-key]");
+      inputs.forEach(inp => {
+        const k = inp.dataset.programKey;
+        const cfg = PROGRAMS[k];
+        BALANCES[k] = (cfg.type === "cash") ? parseMoney(inp.value) : parsePoints(inp.value);
+      });
+      saveBalancesNow();
+      renderBalancesTable(); // reformat numbers nicely
+      updateCalculator(false);
+    });
+
+    clearBalancesBtn.addEventListener('click', () => {
+      if(!confirm("This will clear all saved balances on this device/browser. Continue?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      BALANCES = defaultBalances();
+      setSavedUI(false);
+      renderBalancesTable();
+      updateCalculator(true);
+    });
+
+    // Init
+    populateProgramDropdown();
+    renderRateTable();
+    renderBalancesTable();
+    updateCalculator(true);
+  </script>
+</body>
+</html>
