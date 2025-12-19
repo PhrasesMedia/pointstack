@@ -77,8 +77,6 @@
       font-size:13px;
     }
     button:hover{ background: rgba(255,255,255,0.10); }
-    button.ghost{ background: transparent; }
-    button.ghost:hover{ background: rgba(255,255,255,0.06); }
 
     .note{
       margin-top:12px;
@@ -117,15 +115,72 @@
       .converterGrid{ grid-template-columns: 1.1fr 0.9fr; }
     }
 
-    /* ===== Balances / Rates tables ===== */
-    .table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
-    .table th, .table td{
-      text-align:left;
-      padding:10px 8px;
-      border-bottom:1px solid var(--border);
-      vertical-align:top;
+    /* ===== Balance Cards ===== */
+    .balancesCards{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+      margin-top:12px;
     }
-    .table th{ color:var(--muted); font-weight:600; font-size:12px; }
+    @media (min-width: 900px){
+      .balancesCards{ grid-template-columns: 1fr 1fr; }
+    }
+
+    .balCard{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background: rgba(0,0,0,0.18);
+      padding:12px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .balTop{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      margin-bottom:10px;
+    }
+
+    .balName{
+      font-weight:650;
+      letter-spacing:-0.01em;
+      line-height:1.25;
+    }
+
+    .balCashout{
+      text-align:right;
+      min-width: 92px;
+    }
+
+    .balCashoutLabel{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:0.08em;
+      color:var(--muted);
+    }
+
+    .balCashoutValue{
+      font-size:18px;
+      font-weight:700;
+      margin-top:2px;
+    }
+
+    .balBottom{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .balBottom input{
+      margin:0;
+    }
+
+    .balHint{
+      margin-top:8px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
 
     .status{
       margin-top:10px;
@@ -148,7 +203,17 @@
     .dot{ width:8px; height:8px; border-radius:999px; background: var(--warn); }
     .dot.ok{ background: var(--ok); }
 
-    /* ============ Point Stack Card (Total) ============ */
+    /* ===== Rates table ===== */
+    .table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
+    .table th, .table td{
+      text-align:left;
+      padding:10px 8px;
+      border-bottom:1px solid var(--border);
+      vertical-align:top;
+    }
+    .table th{ color:var(--muted); font-weight:600; font-size:12px; }
+
+    /* ============ Point Stack Total Card ============ */
     .stackCardWrap{ margin-top:14px; }
     .stackCard{
       position:relative;
@@ -174,7 +239,6 @@
       transform: rotate(10deg);
       pointer-events:none;
     }
-    /* subtle sparkle + streak */
     .stackCard::after{
       content:"";
       position:absolute;
@@ -353,7 +417,7 @@
       </div>
     </section>
 
-    <!-- RESULTS: Total card ABOVE balances -->
+    <!-- Total results card -->
     <div class="stackCardWrap" aria-label="Total cash-out across all programs">
       <div class="stackCard">
         <div class="stackTop">
@@ -397,16 +461,7 @@
       <h2>My balances</h2>
       <p class="sub" style="margin-top:-4px;">Store your balances per program. Saved to your browser (localStorage).</p>
 
-      <table class="table">
-        <thead>
-          <tr>
-            <th style="width:34%;">Program</th>
-            <th style="width:33%;">My balance</th>
-            <th style="width:33%;">Cash-out</th>
-          </tr>
-        </thead>
-        <tbody id="balancesBody"></tbody>
-      </table>
+      <div class="balancesCards" id="balancesCards"></div>
 
       <div class="actions" style="margin-top:12px;">
         <button id="saveBalancesBtn" type="button">Save balances</button>
@@ -442,12 +497,6 @@
   </div>
 
   <script>
-    // ======================================
-    // EDIT THESE PROGRAM SETTINGS / CASH RATES
-    // ======================================
-    // type:
-    // - "points": user stores points, cash-out = points * dollarsPerPoint
-    // - "cash":   user stores cash directly (AUD), cash-out = cash
     const PROGRAMS = {
       flybuys: {
         name: "Flybuys",
@@ -475,7 +524,7 @@
       }
     };
 
-    const STORAGE_KEY = "point_stack_balances_v3_total_above";
+    const STORAGE_KEY = "point_stack_balances_v4_balance_cards";
 
     // DOM refs
     const programEl = document.getElementById('program');
@@ -492,7 +541,7 @@
     const copyBtn = document.getElementById('copyBtn');
     const resetCalcBtn = document.getElementById('resetCalcBtn');
 
-    const balancesBody = document.getElementById('balancesBody');
+    const balancesCardsEl = document.getElementById('balancesCards');
     const saveBalancesBtn = document.getElementById('saveBalancesBtn');
     const clearBalancesBtn = document.getElementById('clearBalancesBtn');
 
@@ -556,8 +605,7 @@
         const parsed = JSON.parse(raw);
         const merged = defaultBalances();
         for(const [k, p] of Object.entries(PROGRAMS)){
-          if(p.type === "cash") merged[k] = parseMoney(parsed?.[k] ?? 0);
-          else merged[k] = parsePoints(parsed?.[k] ?? 0);
+          merged[k] = (p.type === "cash") ? parseMoney(parsed?.[k] ?? 0) : parsePoints(parsed?.[k] ?? 0);
         }
         return merged;
       }catch(e){
@@ -598,7 +646,6 @@
       ratesBody.innerHTML = "";
       for(const cfg of Object.values(PROGRAMS)){
         const tr = document.createElement("tr");
-
         const tdName = document.createElement("td");
         tdName.textContent = cfg.name;
 
@@ -635,66 +682,6 @@
       totalCashoutStackEl.textContent = formatMoney(total);
     }
 
-    function renderBalancesTable(){
-      balancesBody.innerHTML = "";
-
-      for(const [key, cfg] of Object.entries(PROGRAMS)){
-        const tr = document.createElement("tr");
-
-        const tdName = document.createElement("td");
-        tdName.textContent = cfg.name;
-
-        const tdInput = document.createElement("td");
-        const input = document.createElement("input");
-        input.dataset.programKey = key;
-
-        if(cfg.type === "cash"){
-          input.type = "text";
-          input.inputMode = "decimal";
-          input.placeholder = "e.g. $25.00";
-          input.value = BALANCES[key] ? String(BALANCES[key].toFixed(2)) : "";
-        }else{
-          input.type = "text";
-          input.inputMode = "numeric";
-          input.placeholder = "e.g. 25,000";
-          input.value = BALANCES[key] ? formatNumber(BALANCES[key]) : "";
-        }
-
-        const tdCash = document.createElement("td");
-        tdCash.dataset.cashcell = "1";
-        tdCash.textContent = formatMoney(cashoutFor(key, BALANCES[key]));
-
-        input.addEventListener("input", () => {
-          setSavedUI(false);
-
-          const newVal = (cfg.type === "cash") ? parseMoney(input.value) : parsePoints(input.value);
-          BALANCES[key] = newVal;
-
-          tdCash.textContent = formatMoney(cashoutFor(key, newVal));
-
-          if(programEl.value === key){
-            setCalculatorInputFromSaved();
-            updateCalculator(false);
-          }
-
-          updateTotalCashout();
-          updateLastUpdated();
-
-          clearTimeout(renderBalancesTable._saveTimer);
-          renderBalancesTable._saveTimer = setTimeout(() => saveBalancesNow(), 250);
-        });
-
-        tdInput.appendChild(input);
-
-        tr.appendChild(tdName);
-        tr.appendChild(tdInput);
-        tr.appendChild(tdCash);
-        balancesBody.appendChild(tr);
-      }
-
-      updateTotalCashout();
-    }
-
     function setCalculatorUIForProgram(){
       const key = programEl.value;
       const cfg = PROGRAMS[key];
@@ -717,11 +704,9 @@
       const cfg = PROGRAMS[key];
       const saved = BALANCES[key] || 0;
 
-      if(cfg.type === "cash"){
-        amountInputEl.value = saved ? String(saved.toFixed(2)) : "";
-      }else{
-        amountInputEl.value = saved ? formatNumber(saved) : "";
-      }
+      amountInputEl.value = (cfg.type === "cash")
+        ? (saved ? String(saved.toFixed(2)) : "")
+        : (saved ? formatNumber(saved) : "");
     }
 
     function updateCalculator(overrideFromSaved=false){
@@ -748,6 +733,91 @@
         metaRateEl.textContent = `Rate: ${rateToText(cfg.dollarsPerPoint)}`;
         rateNoteEl.innerHTML = `<b>Using:</b> ${cfg.name} at <b>${rateToText(cfg.dollarsPerPoint)}</b>. Edit rates in <code>PROGRAMS</code>.`;
       }
+    }
+
+    function renderBalanceCards(){
+      balancesCardsEl.innerHTML = "";
+
+      for(const [key, cfg] of Object.entries(PROGRAMS)){
+        const cashout = cashoutFor(key, BALANCES[key]);
+
+        const card = document.createElement("div");
+        card.className = "balCard";
+
+        const top = document.createElement("div");
+        top.className = "balTop";
+
+        const left = document.createElement("div");
+        const name = document.createElement("div");
+        name.className = "balName";
+        name.textContent = cfg.name;
+
+        const hint = document.createElement("div");
+        hint.className = "balHint";
+        hint.textContent = (cfg.type === "cash")
+          ? "Enter your cash balance (AUD)."
+          : "Enter your points balance.";
+
+        left.appendChild(name);
+        left.appendChild(hint);
+
+        const right = document.createElement("div");
+        right.className = "balCashout";
+        right.innerHTML = `
+          <div class="balCashoutLabel">Cash-out</div>
+          <div class="balCashoutValue" data-cashout="${key}">${formatMoney(cashout)}</div>
+        `;
+
+        top.appendChild(left);
+        top.appendChild(right);
+
+        const bottom = document.createElement("div");
+        bottom.className = "balBottom";
+
+        const input = document.createElement("input");
+        input.dataset.programKey = key;
+
+        if(cfg.type === "cash"){
+          input.type = "text";
+          input.inputMode = "decimal";
+          input.placeholder = "e.g. $25.00";
+          input.value = BALANCES[key] ? String(BALANCES[key].toFixed(2)) : "";
+        }else{
+          input.type = "text";
+          input.inputMode = "numeric";
+          input.placeholder = "e.g. 25,000";
+          input.value = BALANCES[key] ? formatNumber(BALANCES[key]) : "";
+        }
+
+        input.addEventListener("input", () => {
+          setSavedUI(false);
+
+          const newVal = (cfg.type === "cash") ? parseMoney(input.value) : parsePoints(input.value);
+          BALANCES[key] = newVal;
+
+          const cashEl = balancesCardsEl.querySelector(`[data-cashout="${key}"]`);
+          if(cashEl) cashEl.textContent = formatMoney(cashoutFor(key, newVal));
+
+          if(programEl.value === key){
+            setCalculatorInputFromSaved();
+            updateCalculator(false);
+          }
+
+          updateTotalCashout();
+          updateLastUpdated();
+
+          clearTimeout(renderBalanceCards._saveTimer);
+          renderBalanceCards._saveTimer = setTimeout(() => saveBalancesNow(), 250);
+        });
+
+        bottom.appendChild(input);
+
+        card.appendChild(top);
+        card.appendChild(bottom);
+        balancesCardsEl.appendChild(card);
+      }
+
+      updateTotalCashout();
     }
 
     function buildExportText(){
@@ -816,15 +886,15 @@
       const newVal = (cfg.type === "cash") ? parseMoney(amountInputEl.value) : parsePoints(amountInputEl.value);
       BALANCES[key] = newVal;
 
-      const rowInput = balancesBody.querySelector(`input[data-program-key="${key}"]`);
+      // Sync the card input + cashout
+      const rowInput = balancesCardsEl.querySelector(`input[data-program-key="${key}"]`);
       if(rowInput){
         rowInput.value = (cfg.type === "cash")
           ? (newVal ? String(newVal.toFixed(2)) : "")
           : (newVal ? formatNumber(newVal) : "");
-
-        const cashCell = rowInput.closest("tr").querySelector("[data-cashcell='1']");
-        cashCell.textContent = formatMoney(cashoutFor(key, newVal));
       }
+      const cashEl = balancesCardsEl.querySelector(`[data-cashout="${key}"]`);
+      if(cashEl) cashEl.textContent = formatMoney(cashoutFor(key, newVal));
 
       updateTotalCashout();
       updateLastUpdated();
@@ -847,14 +917,14 @@
     });
 
     saveBalancesBtn.addEventListener('click', () => {
-      const inputs = balancesBody.querySelectorAll("input[data-program-key]");
+      const inputs = balancesCardsEl.querySelectorAll("input[data-program-key]");
       inputs.forEach(inp => {
         const k = inp.dataset.programKey;
         const cfg = PROGRAMS[k];
         BALANCES[k] = (cfg.type === "cash") ? parseMoney(inp.value) : parsePoints(inp.value);
       });
       saveBalancesNow();
-      renderBalancesTable();
+      renderBalanceCards();
       updateCalculator(false);
       updateTotalCashout();
       updateLastUpdated();
@@ -865,7 +935,7 @@
       localStorage.removeItem(STORAGE_KEY);
       BALANCES = defaultBalances();
       setSavedUI(false);
-      renderBalancesTable();
+      renderBalanceCards();
       updateCalculator(true);
       updateTotalCashout();
       updateLastUpdated();
@@ -883,7 +953,7 @@
     // Init
     populateProgramDropdown();
     renderRateTable();
-    renderBalancesTable();
+    renderBalanceCards();
     updateCalculator(true);
     updateTotalCashout();
     updateLastUpdated();
