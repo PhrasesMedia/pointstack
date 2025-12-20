@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cash-out estimator for rewards programs</title>
-  <meta name="description" content="Estimate the cash-out value of Flybuys, Everyday Rewards, Velocity and Amex points in Australian dollars." />
+  <title>Point Stack</title>
+  <meta name="description" content="Point Stack: estimate the cash-out value of Flybuys, Everyday Rewards, Velocity and Amex in AUD." />
 
   <style>
     :root{
@@ -25,19 +25,58 @@
                   radial-gradient(900px 500px at 90% 10%, #2a1f44 0%, transparent 60%),
                   var(--bg);
     }
-    .wrap{ max-width:980px; margin:0 auto; padding:26px 18px 48px; }
-    header{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:14px; }
-    .brand{ display:flex; flex-direction:column; gap:6px; }
-    h1{ margin:0; font-size:28px; line-height:1.15; letter-spacing:-0.02em; }
-    .sub{ margin:0; color:var(--muted); font-size:14px; line-height:1.45; }
+    .wrap{ max-width:980px; margin:0 auto; padding:22px 18px 48px; position:relative; }
+
+    /* Compact, centered logo header (no box) */
+    .headerCentered{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      margin:10px 0 18px;
+      text-align:center;
+      position:relative;
+    }
+    /* IMPORTANT: no border/shadow/radius so it blends into background */
+    .logoSmall{
+      width:240px;
+      max-width:70%;
+      height:auto;
+      display:block;
+      border:none;
+      border-radius:0;
+      box-shadow:none;
+    }
+    .subtitle{
+      margin:0;
+      font-size:14px;
+      color:rgba(229,231,235,0.75);
+      max-width:52ch;
+      line-height:1.45;
+    }
     .pill{
+      position:absolute;
+      top:10px;
+      right:18px;
       padding:8px 10px;
       border:1px solid var(--border);
       border-radius:999px;
-      color:var(--muted);
+      color:rgba(229,231,235,0.75);
       font-size:12px;
-      align-self:flex-start;
       white-space:nowrap;
+      background: rgba(0,0,0,0.18);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    @media (max-width: 640px){
+      .pill{ right:14px; }
+    }
+    @media (max-width: 520px){
+      .wrap{ padding:18px 14px 40px; }
+      .logoSmall{ width:180px; max-width:78%; }
+      .subtitle{ font-size:13px; }
     }
 
     .card{
@@ -91,13 +130,12 @@
       background: rgba(0,0,0,0.18);
     }
 
-    /* ===== Ultra-compact Converter ===== */
+    /* Compact Converter */
     .converterCard{ padding:10px; }
     .converterCard h2{ font-size:13px; margin-bottom:6px; }
     .converterCard label{ font-size:11px; margin:8px 0 4px; }
     .converterCard input, .converterCard select{ padding:9px 10px; font-size:13px; }
     .converterCard .hint{ font-size:10.5px; margin-top:6px; }
-    .converterGrid{ display:block; }
 
     .resultInline{
       margin-top:10px;
@@ -110,14 +148,8 @@
     .resultInline .label{ color:var(--muted); font-size:11px; }
     .resultInline .value{ font-size:22px; font-weight:700; letter-spacing:-0.02em; }
 
-    @media (max-width: 520px){
-      .wrap{ padding:20px 14px 40px; }
-      h1{ font-size:24px; }
-    }
-
     /* ===== Point Stack card ===== */
     .stackCardWrap{ margin-top:12px; }
-
     .stackCard{
       position:relative;
       overflow:hidden;
@@ -314,53 +346,47 @@
     .table th{ color:var(--muted); font-weight:600; font-size:12px; }
 
     footer{ margin-top:16px; color:var(--muted); font-size:12px; line-height:1.45; }
-    code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <header>
-      <div class="brand">
-        <h1>Cash-out estimator for rewards programs</h1>
-        <p class="sub">Cash-out estimate + saved balances (stored locally in your browser).</p>
-      </div>
-      <div class="pill">AUD • cash-out</div>
+    <div class="pill">AUD • cash-out</div>
+
+    <header class="headerCentered">
+      <img class="logoSmall" src="Point Stack.png" alt="Point Stack" />
+      <p class="subtitle">Cash-out estimate + saved balances (stored locally in your browser).</p>
     </header>
 
     <!-- Ultra-compact converter -->
     <section class="card converterCard">
       <h2>Converter</h2>
 
-      <div class="converterGrid">
+      <label for="program">Program</label>
+      <select id="program"></select>
+
+      <label id="amountLabel" for="amountInput">Points</label>
+      <input id="amountInput" type="text" inputmode="decimal" placeholder="e.g. 50,000" />
+
+      <p class="hint" id="hintText">
+        Tip: Commas work (e.g. <b>120,000</b>). Switching programs loads your saved balance.
+      </p>
+
+      <div class="resultInline">
         <div>
-          <label for="program">Program</label>
-          <select id="program"></select>
-
-          <label id="amountLabel" for="amountInput">Points</label>
-          <input id="amountInput" type="text" inputmode="decimal" placeholder="e.g. 50,000" />
-
-          <p class="hint" id="hintText">
-            Tip: Commas work (e.g. <b>120,000</b>). Switching programs loads your saved balance.
-          </p>
-
-          <div class="resultInline">
-            <div>
-              <div class="label" id="resultLabel">Cash-out</div>
-              <div class="value" id="resultValue">$0.00</div>
-            </div>
-
-            <div class="meta" style="margin:0;">
-              <span id="metaAmount">0 points</span>
-              <span id="metaRate">Rate: —</span>
-            </div>
-          </div>
-
-          <div class="actions">
-            <button id="copyBtn" type="button">Copy result</button>
-            <button id="resetCalcBtn" type="button">Reset</button>
-          </div>
+          <div class="label" id="resultLabel">Cash-out</div>
+          <div class="value" id="resultValue">$0.00</div>
         </div>
+
+        <div class="meta" style="margin:0;">
+          <span id="metaAmount">0 points</span>
+          <span id="metaRate">Rate: —</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="copyBtn" type="button">Copy result</button>
+        <button id="resetCalcBtn" type="button">Reset</button>
       </div>
     </section>
 
@@ -403,7 +429,9 @@
     <!-- Rates -->
     <section class="card" style="margin-top:14px;">
       <h2>Rates used</h2>
-      <p class="sub" style="margin-top:-4px;">Everyday Rewards is treated as a cash balance. The other programs use fixed cash-equivalent rates.</p>
+      <p class="subtitle" style="margin-top:-6px;">
+        Everyday Rewards is treated as a cash balance. The other programs use fixed cash-equivalent rates.
+      </p>
 
       <table class="table">
         <thead>
@@ -416,9 +444,7 @@
         <tbody id="ratesBody"></tbody>
       </table>
 
-      <footer>
-        These are cash-equivalent estimates for quick comparison.
-      </footer>
+      <footer>These are cash-equivalent estimates for quick comparison.</footer>
     </section>
   </div>
 
@@ -450,7 +476,7 @@
       }
     };
 
-    const STORAGE_KEY = "point_stack_balances_v10_half_converter";
+    const STORAGE_KEY = "point_stack_balances_v14_logo_no_box";
 
     const programEl = document.getElementById('program');
     const amountLabelEl = document.getElementById('amountLabel');
