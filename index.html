@@ -25,7 +25,14 @@
                   radial-gradient(900px 500px at 90% 10%, #2a1f44 0%, transparent 60%),
                   var(--bg);
     }
-    .wrap{ max-width:980px; margin:0 auto; padding:22px 18px 48px; position:relative; }
+
+    /* ↓ tightened overall top padding slightly */
+    .wrap{
+      max-width:980px;
+      margin:0 auto;
+      padding:18px 18px 48px;
+      position:relative;
+    }
 
     /* Compact, centered logo header (no box) */
     .headerCentered{
@@ -34,10 +41,12 @@
       align-items:center;
       justify-content:center;
       gap:10px;
-      margin:10px 0 18px;
+      /* ↓ reduce bottom margin so converter sits closer */
+      margin:10px 0 10px;
       text-align:center;
       position:relative;
     }
+
     /* IMPORTANT: no border/shadow/radius so it blends into background */
     .logoSmall{
       width:240px;
@@ -48,38 +57,16 @@
       border-radius:0;
       box-shadow:none;
     }
-    .subtitle{
-      margin:0;
-      font-size:14px;
-      color:rgba(229,231,235,0.75);
-      max-width:52ch;
-      line-height:1.45;
-    }
-    .pill{
-      position:absolute;
-      top:10px;
-      right:18px;
-      padding:8px 10px;
-      border:1px solid var(--border);
-      border-radius:999px;
-      color:rgba(229,231,235,0.75);
-      font-size:12px;
-      white-space:nowrap;
-      background: rgba(0,0,0,0.18);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-    }
 
-    @media (max-width: 640px){
-      .pill{ right:14px; }
-    }
+    /* Removed pill styles because we removed the pill element */
+    /* .pill { ... } */
 
     /* ---- Mobile tightening so the Point Stack card sits higher ---- */
     @media (max-width: 520px){
-      .wrap{ padding:18px 14px 40px; }
+      .wrap{ padding:14px 14px 40px; }
 
       .headerCentered{
-        margin: 6px 0 10px;
+        margin: 6px 0 8px;
         gap: 6px;
       }
 
@@ -88,14 +75,8 @@
         max-width:78%;
       }
 
-      .subtitle{
-        font-size:12.5px;
-        line-height:1.35;
-        max-width:40ch;
-      }
-
       .converterCard{
-        margin-top: 6px;
+        margin-top: 4px;
         padding: 8px;
       }
     }
@@ -373,11 +354,10 @@
 
 <body>
   <div class="wrap">
-    <div class="pill">AUD • cash-out</div>
+    <!-- pill removed -->
 
     <header class="headerCentered">
       <img class="logoSmall" src="Point Stack.png" alt="Point Stack" />
-      <!-- subtitle removed -->
     </header>
 
     <!-- Ultra-compact converter -->
@@ -451,7 +431,7 @@
     <!-- Rates -->
     <section class="card" style="margin-top:14px;">
       <h2>Rates used</h2>
-      <p class="subtitle" style="margin-top:-6px;">
+      <p style="margin-top:-6px; color:rgba(229,231,235,0.75); font-size:14px; line-height:1.45;">
         Everyday Rewards is treated as a cash balance. The other programs use fixed cash-equivalent rates.
       </p>
 
