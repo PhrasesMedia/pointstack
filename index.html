@@ -14,6 +14,7 @@
       --border:rgba(255,255,255,0.08);
       --shadow: 0 12px 30px rgba(0,0,0,0.35);
       --radius:16px;
+      --accent-gold:#f0c75e;
     }
     *{box-sizing:border-box}
     body{
@@ -25,14 +26,7 @@
                   radial-gradient(900px 500px at 90% 10%, #2a1f44 0%, transparent 60%),
                   var(--bg);
     }
-
-    /* ↓ tightened overall top padding */
-    .wrap{
-      max-width:980px;
-      margin:0 auto;
-      padding:10px 18px 48px; /* was 18px */
-      position:relative;
-    }
+    .wrap{ max-width:980px; margin:0 auto; padding:8px 18px 48px; position:relative; }
 
     /* Compact, centered logo header (no box) */
     .headerCentered{
@@ -41,15 +35,13 @@
       align-items:center;
       justify-content:center;
       gap:0;
-      margin:0 0 8px; /* was 10px 0 10px */
+      margin:6px 0 10px;
       text-align:center;
       position:relative;
     }
-
-    /* IMPORTANT: no border/shadow/radius so it blends into background */
     .logoSmall{
-      width:200px;         /* was 240px */
-      max-width:68%;
+      width:200px;
+      max-width:70%;
       height:auto;
       display:block;
       border:none;
@@ -58,16 +50,9 @@
     }
 
     @media (max-width: 520px){
-      .wrap{ padding:8px 14px 40px; } /* was 14px */
-      .headerCentered{ margin:0 0 6px; }
-      .logoSmall{
-        width:160px;
-        max-width:70%;
-      }
-      .converterCard{
-        margin-top: 0;
-        padding: 8px;
-      }
+      .wrap{ padding:8px 14px 40px; }
+      .logoSmall{ width:170px; max-width:78%; }
+      .converterCard{ margin-top: 4px; }
     }
 
     .card{
@@ -90,7 +75,10 @@
       outline:none;
       font-size:14px;
     }
-    input:focus, select:focus{ border-color: rgba(255,255,255,0.22); }
+    input:focus, select:focus{
+      border-color: rgba(240,199,94,0.35);
+      box-shadow: 0 0 0 1px rgba(240,199,94,0.20);
+    }
 
     .hint{ color:var(--muted); font-size:12px; margin-top:8px; line-height:1.45; }
 
@@ -122,7 +110,7 @@
     }
 
     /* Compact Converter */
-    .converterCard{ padding:10px; margin-top:0; } /* ensure no extra gap */
+    .converterCard{ padding:9px; margin-top:0; }
     .converterCard h2{ font-size:13px; margin-bottom:6px; }
     .converterCard label{ font-size:11px; margin:8px 0 4px; }
     .converterCard input, .converterCard select{ padding:9px 10px; font-size:13px; }
@@ -137,10 +125,15 @@
       flex-wrap:wrap;
     }
     .resultInline .label{ color:var(--muted); font-size:11px; }
-    .resultInline .value{ font-size:22px; font-weight:700; letter-spacing:-0.02em; }
+    .resultInline .value{
+      font-size:22px;
+      font-weight:700;
+      letter-spacing:-0.02em;
+      color: var(--accent-gold);
+    }
 
     /* ===== Point Stack card ===== */
-    .stackCardWrap{ margin-top:12px; }
+    .stackCardWrap{ margin-top:10px; }
     .stackCard{
       position:relative;
       overflow:hidden;
@@ -335,8 +328,22 @@
       vertical-align:top;
     }
     .table th{ color:var(--muted); font-weight:600; font-size:12px; }
+    .table td:nth-child(2){ color: var(--accent-gold); font-weight: 600; }
 
-    footer{ margin-top:16px; color:var(--muted); font-size:12px; line-height:1.45; }
+    /* Footer info for Reddit-ready clarity */
+    .infoFooter{
+      margin-top:14px;
+      padding:14px 16px;
+      border-radius: var(--radius);
+      border:1px solid var(--border);
+      background: rgba(0,0,0,0.16);
+      color: rgba(229,231,235,0.78);
+      font-size:12.5px;
+      line-height:1.5;
+    }
+    .infoFooter p{ margin: 0 0 10px 0; }
+    .infoFooter p:last-child{ margin-bottom:0; }
+    .infoFooter strong{ color: rgba(229,231,235,0.92); font-weight: 700; }
   </style>
 </head>
 
@@ -417,7 +424,7 @@
     <!-- Rates -->
     <section class="card" style="margin-top:14px;">
       <h2>Rates used</h2>
-      <p style="margin-top:-6px; color:rgba(229,231,235,0.75); font-size:14px; line-height:1.45;">
+      <p class="hint" style="margin-top:-4px;">
         Everyday Rewards is treated as a cash balance. The other programs use fixed cash-equivalent rates.
       </p>
 
@@ -431,20 +438,45 @@
         </thead>
         <tbody id="ratesBody"></tbody>
       </table>
+    </section>
 
-      <footer>These are cash-equivalent estimates for quick comparison.</footer>
+    <!-- Bottom page notes -->
+    <section class="infoFooter" aria-label="Notes">
+      <p><strong>What this does:</strong> Point Stack estimates the cash-out value of popular Australian rewards programs using simple, comparable rates.</p>
+      <p><strong>Disclaimer:</strong> Values shown are estimates only. Actual redemption value may vary depending on how and where points are redeemed.</p>
+      <p><strong>Privacy:</strong> All balances are stored locally in your browser (localStorage). No data is sent anywhere.</p>
     </section>
   </div>
 
   <script>
     const PROGRAMS = {
-      flybuys: { name: "Flybuys", type: "points", dollarsPerPoint: 0.005, note: "Cash-equivalent estimate per point." },
-      everyday_rewards: { name: "Woolworths Everyday Rewards", type: "cash", dollarsPerPoint: null, note: "Cash balance (AUD). No conversion." },
-      velocity: { name: "Velocity Frequent Flyer", type: "points", dollarsPerPoint: 0.003, note: "Cash-equivalent estimate per point." },
-      amex_mr: { name: "Amex Membership Rewards", type: "points", dollarsPerPoint: 0.005, note: "Cash-equivalent estimate per point." }
+      flybuys: {
+        name: "Flybuys",
+        type: "points",
+        dollarsPerPoint: 0.005,
+        note: "Cash-equivalent estimate per point."
+      },
+      everyday_rewards: {
+        name: "Woolworths Everyday Rewards",
+        type: "cash",
+        dollarsPerPoint: null,
+        note: "Cash balance (AUD). No conversion."
+      },
+      velocity: {
+        name: "Velocity Frequent Flyer",
+        type: "points",
+        dollarsPerPoint: 0.003,
+        note: "Cash-equivalent estimate per point."
+      },
+      amex_mr: {
+        name: "Amex Membership Rewards",
+        type: "points",
+        dollarsPerPoint: 0.005,
+        note: "Cash-equivalent estimate per point."
+      }
     };
 
-    const STORAGE_KEY = "point_stack_balances_v15_mobile_tight";
+    const STORAGE_KEY = "point_stack_balances_v16_footer";
 
     const programEl = document.getElementById('program');
     const amountLabelEl = document.getElementById('amountLabel');
@@ -674,7 +706,9 @@
       }
     }
 
-    programEl.addEventListener('change', () => updateCalculator(true));
+    programEl.addEventListener('change', () => {
+      updateCalculator(true);
+    });
 
     amountInputEl.addEventListener('input', () => {
       updateCalculator(false);
