@@ -14,8 +14,13 @@
       --border:rgba(255,255,255,0.08);
       --shadow: 0 12px 30px rgba(0,0,0,0.35);
       --radius:16px;
-      --accent-gold:#f0c75e;
+
+      /* Gold accent (used for converter result + rates column) */
+      --gold1:#f6d98f;
+      --gold2:#d7aa4a;
+      --goldText: rgba(246,217,143,0.95);
     }
+
     *{box-sizing:border-box}
     body{
       margin:0;
@@ -26,33 +31,41 @@
                   radial-gradient(900px 500px at 90% 10%, #2a1f44 0%, transparent 60%),
                   var(--bg);
     }
-    .wrap{ max-width:980px; margin:0 auto; padding:8px 18px 48px; position:relative; }
+    .wrap{
+      max-width:980px;
+      margin:0 auto;
+      padding:18px 18px 48px;
+      position:relative;
+    }
 
-    /* Compact, centered logo header (no box) */
+    /* Logo header (no box) */
     .headerCentered{
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
       gap:0;
-      margin:6px 0 10px;
+      margin:6px 0 8px;
       text-align:center;
       position:relative;
     }
     .logoSmall{
-      width:200px;
+      width:240px;
       max-width:70%;
       height:auto;
       display:block;
       border:none;
       border-radius:0;
       box-shadow:none;
+      background: transparent;
     }
 
+    /* ---- Mobile tightening ---- */
     @media (max-width: 520px){
-      .wrap{ padding:8px 14px 40px; }
-      .logoSmall{ width:170px; max-width:78%; }
-      .converterCard{ margin-top: 4px; }
+      .wrap{ padding:14px 14px 40px; }
+      .headerCentered{ margin: 6px 0 6px; }
+      .logoSmall{ width:180px; max-width:78%; }
+      .converterCard{ margin-top: 4px; padding: 8px; }
     }
 
     .card{
@@ -75,10 +88,7 @@
       outline:none;
       font-size:14px;
     }
-    input:focus, select:focus{
-      border-color: rgba(240,199,94,0.35);
-      box-shadow: 0 0 0 1px rgba(240,199,94,0.20);
-    }
+    input:focus, select:focus{ border-color: rgba(255,255,255,0.22); }
 
     .hint{ color:var(--muted); font-size:12px; margin-top:8px; line-height:1.45; }
 
@@ -110,7 +120,7 @@
     }
 
     /* Compact Converter */
-    .converterCard{ padding:9px; margin-top:0; }
+    .converterCard{ padding:10px; }
     .converterCard h2{ font-size:13px; margin-bottom:6px; }
     .converterCard label{ font-size:11px; margin:8px 0 4px; }
     .converterCard input, .converterCard select{ padding:9px 10px; font-size:13px; }
@@ -127,13 +137,14 @@
     .resultInline .label{ color:var(--muted); font-size:11px; }
     .resultInline .value{
       font-size:22px;
-      font-weight:700;
+      font-weight:800;
       letter-spacing:-0.02em;
-      color: var(--accent-gold);
+      color: var(--goldText);              /* bring back the gold */
+      text-shadow: 0 10px 22px rgba(0,0,0,0.25);
     }
 
     /* ===== Point Stack card ===== */
-    .stackCardWrap{ margin-top:10px; }
+    .stackCardWrap{ margin-top:12px; }
     .stackCard{
       position:relative;
       overflow:hidden;
@@ -319,6 +330,18 @@
       .stackBreakdown{ width: 100%; padding-left: 0; }
     }
 
+    /* Card image actions */
+    .stackActions{
+      margin-top:10px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .stackActions button{
+      padding:8px 12px;
+      border-radius:12px;
+    }
+
     /* Rates table */
     .table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
     .table th, .table td{
@@ -328,22 +351,14 @@
       vertical-align:top;
     }
     .table th{ color:var(--muted); font-weight:600; font-size:12px; }
-    .table td:nth-child(2){ color: var(--accent-gold); font-weight: 600; }
 
-    /* Footer info for Reddit-ready clarity */
-    .infoFooter{
-      margin-top:14px;
-      padding:14px 16px;
-      border-radius: var(--radius);
-      border:1px solid var(--border);
-      background: rgba(0,0,0,0.16);
-      color: rgba(229,231,235,0.78);
-      font-size:12.5px;
-      line-height:1.5;
+    /* Gold in Cash-out rate column */
+    #ratesBody td:nth-child(2){
+      color: var(--goldText);
+      font-weight: 700;
     }
-    .infoFooter p{ margin: 0 0 10px 0; }
-    .infoFooter p:last-child{ margin-bottom:0; }
-    .infoFooter strong{ color: rgba(229,231,235,0.92); font-weight: 700; }
+
+    footer{ margin-top:16px; color:var(--muted); font-size:12px; line-height:1.45; }
   </style>
 </head>
 
@@ -419,12 +434,17 @@
           <div class="stackBadge">CASH</div>
         </div>
       </div>
+
+      <div class="stackActions">
+        <button id="copyCardBtn" type="button">Copy card image</button>
+        <button id="downloadCardBtn" type="button">Download card image</button>
+      </div>
     </div>
 
     <!-- Rates -->
     <section class="card" style="margin-top:14px;">
       <h2>Rates used</h2>
-      <p class="hint" style="margin-top:-4px;">
+      <p style="margin:6px 0 0; font-size:13px; color: rgba(229,231,235,0.75); line-height:1.45;">
         Everyday Rewards is treated as a cash balance. The other programs use fixed cash-equivalent rates.
       </p>
 
@@ -438,15 +458,17 @@
         </thead>
         <tbody id="ratesBody"></tbody>
       </table>
-    </section>
 
-    <!-- Bottom page notes -->
-    <section class="infoFooter" aria-label="Notes">
-      <p><strong>What this does:</strong> Point Stack estimates the cash-out value of popular Australian rewards programs using simple, comparable rates.</p>
-      <p><strong>Disclaimer:</strong> Values shown are estimates only. Actual redemption value may vary depending on how and where points are redeemed.</p>
-      <p><strong>Privacy:</strong> All balances are stored locally in your browser (localStorage). No data is sent anywhere.</p>
+      <footer>
+        <b>What this does:</b> Point Stack estimates the cash-out value of popular Australian rewards programs using simple, comparable rates.
+        <br/>
+        <b>Disclaimer:</b> These are estimates only. Actual redemption value can vary depending on how and where points are used.
+      </footer>
     </section>
   </div>
+
+  <!-- Library for exporting the card as an image -->
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 
   <script>
     const PROGRAMS = {
@@ -476,7 +498,7 @@
       }
     };
 
-    const STORAGE_KEY = "point_stack_balances_v16_footer";
+    const STORAGE_KEY = "point_stack_balances_v16_gold_copycard";
 
     const programEl = document.getElementById('program');
     const amountLabelEl = document.getElementById('amountLabel');
@@ -495,6 +517,10 @@
     const lastUpdatedTextEl = document.getElementById('lastUpdatedText');
     const totalCashoutStackEl = document.getElementById('totalCashoutStack');
     const stackBreakdownEl = document.getElementById('stackBreakdown');
+
+    const copyCardBtn = document.getElementById('copyCardBtn');
+    const downloadCardBtn = document.getElementById('downloadCardBtn');
+    const stackCardEl = document.querySelector('.stackCard');
 
     function formatMoney(amount){
       return new Intl.NumberFormat("en-AU", {
@@ -737,6 +763,55 @@
       amountInputEl.value = "";
       updateCalculator(false);
       amountInputEl.focus();
+    });
+
+    /* ---- Copy/download card image ---- */
+    function dataUrlToBlob(dataUrl){
+      const [meta, b64] = dataUrl.split(',');
+      const mime = meta.match(/data:(.*?);base64/)?.[1] || 'image/png';
+      const bytes = atob(b64);
+      const arr = new Uint8Array(bytes.length);
+      for(let i=0;i<bytes.length;i++) arr[i] = bytes.charCodeAt(i);
+      return new Blob([arr], { type: mime });
+    }
+
+    async function makeCardPngDataUrl(){
+      return await window.htmlToImage.toPng(stackCardEl, {
+        pixelRatio: 2,
+        cacheBust: true,
+        backgroundColor: null
+      });
+    }
+
+    copyCardBtn?.addEventListener('click', async () => {
+      try{
+        const dataUrl = await makeCardPngDataUrl();
+        const blob = dataUrlToBlob(dataUrl);
+
+        await navigator.clipboard.write([
+          new ClipboardItem({ [blob.type]: blob })
+        ]);
+
+        copyCardBtn.textContent = "Copied!";
+        setTimeout(() => copyCardBtn.textContent = "Copy card image", 900);
+      }catch(err){
+        // iOS Safari often fails clipboard image copy — fallback to download
+        downloadCardBtn?.click();
+      }
+    });
+
+    downloadCardBtn?.addEventListener('click', async () => {
+      try{
+        const dataUrl = await makeCardPngDataUrl();
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = 'point-stack-card.png';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }catch(err){
+        alert("Sorry — couldn’t export the card image on this browser.");
+      }
     });
 
     // Init
