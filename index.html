@@ -139,7 +139,7 @@
       font-size:22px;
       font-weight:800;
       letter-spacing:-0.02em;
-      color: var(--goldText);              /* bring back the gold */
+      color: var(--goldText);
       text-shadow: 0 10px 22px rgba(0,0,0,0.25);
     }
 
@@ -330,18 +330,6 @@
       .stackBreakdown{ width: 100%; padding-left: 0; }
     }
 
-    /* Card image actions */
-    .stackActions{
-      margin-top:10px;
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-    .stackActions button{
-      padding:8px 12px;
-      border-radius:12px;
-    }
-
     /* Rates table */
     .table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
     .table th, .table td{
@@ -434,11 +422,6 @@
           <div class="stackBadge">CASH</div>
         </div>
       </div>
-
-      <div class="stackActions">
-        <button id="copyCardBtn" type="button">Copy card image</button>
-        <button id="downloadCardBtn" type="button">Download card image</button>
-      </div>
     </div>
 
     <!-- Rates -->
@@ -466,9 +449,6 @@
       </footer>
     </section>
   </div>
-
-  <!-- Library for exporting the card as an image -->
-  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 
   <script>
     const PROGRAMS = {
@@ -517,10 +497,6 @@
     const lastUpdatedTextEl = document.getElementById('lastUpdatedText');
     const totalCashoutStackEl = document.getElementById('totalCashoutStack');
     const stackBreakdownEl = document.getElementById('stackBreakdown');
-
-    const copyCardBtn = document.getElementById('copyCardBtn');
-    const downloadCardBtn = document.getElementById('downloadCardBtn');
-    const stackCardEl = document.querySelector('.stackCard');
 
     function formatMoney(amount){
       return new Intl.NumberFormat("en-AU", {
@@ -763,55 +739,6 @@
       amountInputEl.value = "";
       updateCalculator(false);
       amountInputEl.focus();
-    });
-
-    /* ---- Copy/download card image ---- */
-    function dataUrlToBlob(dataUrl){
-      const [meta, b64] = dataUrl.split(',');
-      const mime = meta.match(/data:(.*?);base64/)?.[1] || 'image/png';
-      const bytes = atob(b64);
-      const arr = new Uint8Array(bytes.length);
-      for(let i=0;i<bytes.length;i++) arr[i] = bytes.charCodeAt(i);
-      return new Blob([arr], { type: mime });
-    }
-
-    async function makeCardPngDataUrl(){
-      return await window.htmlToImage.toPng(stackCardEl, {
-        pixelRatio: 2,
-        cacheBust: true,
-        backgroundColor: null
-      });
-    }
-
-    copyCardBtn?.addEventListener('click', async () => {
-      try{
-        const dataUrl = await makeCardPngDataUrl();
-        const blob = dataUrlToBlob(dataUrl);
-
-        await navigator.clipboard.write([
-          new ClipboardItem({ [blob.type]: blob })
-        ]);
-
-        copyCardBtn.textContent = "Copied!";
-        setTimeout(() => copyCardBtn.textContent = "Copy card image", 900);
-      }catch(err){
-        // iOS Safari often fails clipboard image copy — fallback to download
-        downloadCardBtn?.click();
-      }
-    });
-
-    downloadCardBtn?.addEventListener('click', async () => {
-      try{
-        const dataUrl = await makeCardPngDataUrl();
-        const a = document.createElement('a');
-        a.href = dataUrl;
-        a.download = 'point-stack-card.png';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      }catch(err){
-        alert("Sorry — couldn’t export the card image on this browser.");
-      }
     });
 
     // Init
